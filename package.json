@@ -1,0 +1,37 @@
+{
+  "name": "three-vr-boilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "index.js",
+  "scripts": {
+    "start": "webpack-dev-server --mode development",
+    "test": "ava test/*.test.ts",
+    "bench": "ts-node ./bench/index.ts"
+  },
+  "ava": {
+    "compileEnhancements": false,
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  },
+  "dependencies": {
+    "@types/three": "^0.93.19",
+    "bitset": "^5.0.5",
+    "three": "^0.101.1"
+  },
+  "devDependencies": {
+    "ava": "^1.2.0",
+    "html-webpack-plugin": "^3.2.0",
+    "ts-loader": "^5.3.3",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.1",
+    "webpack": "^4.29.0",
+    "webpack-cli": "^3.2.1",
+    "webpack-dev-server": "^3.1.14"
+  }
+}
