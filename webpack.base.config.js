@@ -1,10 +1,10 @@
 const path = require("path");
+const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
   mode: "development",
   devtool: "inline-source-map",
-  entry: path.resolve(__dirname, "example", "index.ts"),
   output: {
     filename: "bundle.js"
   },
@@ -17,6 +17,9 @@ module.exports = {
     ]
   },
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV)
+    }),
     new HTMLWebpackPlugin({
       template: path.resolve(__dirname, "index.html")
     })

@@ -1,1 +1,5 @@
-type Constructor<T> = new (...args: any[]) => T;
+declare var process : {
+  env: {
+    NODE_ENV: string
+  }
+}

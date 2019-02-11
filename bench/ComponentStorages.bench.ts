@@ -1,9 +1,10 @@
-import { MapComponentStorage, ArrayStorage } from "../src/ComponentStorage";
+import { MapComponentStorage } from "../src/MapComponentStorage";
+import { SparseArrayComponentStorage } from "../src/SparseArrayComponentStorage";
 
 const mapStorage = new MapComponentStorage();
-const arrayStorage = new ArrayStorage();
+const arrayStorage = new SparseArrayComponentStorage();
 const randMapStorage = new MapComponentStorage();
-const randArrayStorage = new ArrayStorage();
+const randArrayStorage = new SparseArrayComponentStorage();
 
 class TransformComponent {
 
@@ -23,13 +24,13 @@ for (let i = 0; i < 1000000; i++) {
 
 console.timeEnd("MapComponentStorage#set()");
 
-console.time("ArrayStorage#set()");
+console.time("SparseArrayComponentStorage#set()");
 
 for (let i = 0; i < 1000000; i++) {
   arrayStorage.set(i, transformComponents[i]);
 }
 
-console.timeEnd("ArrayStorage#set()");
+console.timeEnd("SparseArrayComponentStorage#set()");
 
 console.time("MapComponentStorage#get() linear");
 
@@ -39,13 +40,13 @@ for (let i = 0; i < 1000000; i++) {
 
 console.timeEnd("MapComponentStorage#get() linear");
 
-console.time("ArrayStorage#get() linear");
+console.time("SparseArrayComponentStorage#get() linear");
 
 for (let i = 0; i < 1000000; i++) {
   arrayStorage.get(i);
 }
 
-console.timeEnd("ArrayStorage#get() linear");
+console.timeEnd("SparseArrayComponentStorage#get() linear");
 
 console.time("MapComponentStorage#get() random");
 
@@ -55,45 +56,13 @@ for (let i = 0; i < 1000000; i++) {
 
 console.timeEnd("MapComponentStorage#get() random");
 
-console.time("ArrayStorage#get() random");
+console.time("SparseArrayComponentStorage#get() random");
 
 for (let i = 0; i < 1000000; i++) {
   arrayStorage.get(Math.random() * 1000000);
 }
 
-console.timeEnd("ArrayStorage#get() random");
-
-console.time("MapComponentStorage#has() linear");
-
-for (let i = 0; i < 1000000; i++) {
-  mapStorage.has(i);
-}
-
-console.timeEnd("MapComponentStorage#has() linear");
-
-console.time("ArrayStorage#has() linear");
-
-for (let i = 0; i < 1000000; i++) {
-  arrayStorage.has(i);
-}
-
-console.timeEnd("ArrayStorage#has() linear");
-
-console.time("MapComponentStorage#has() random");
-
-for (let i = 0; i < 1000000; i++) {
-  mapStorage.has(Math.random() * 1000000);
-}
-
-console.timeEnd("MapComponentStorage#has() random");
-
-console.time("ArrayStorage#has() random");
-
-for (let i = 0; i < 1000000; i++) {
-  arrayStorage.has(Math.random() * 1000000);
-}
-
-console.timeEnd("ArrayStorage#has() random");
+console.timeEnd("SparseArrayComponentStorage#get() random");
 
 console.time("MapComponentStorage#remove() linear");
 
@@ -103,13 +72,13 @@ for (let i = 0; i < 1000000; i++) {
 
 console.timeEnd("MapComponentStorage#remove() linear");
 
-console.time("ArrayStorage#remove() linear");
+console.time("SparseArrayComponentStorage#remove() linear");
 
 for (let i = 0; i < 1000000; i++) {
   arrayStorage.remove(i);
 }
 
-console.timeEnd("ArrayStorage#remove() linear");
+console.timeEnd("SparseArrayComponentStorage#remove() linear");
 
 for (let i = 0; i < 1000000; i++) {
   randMapStorage.set(i, transformComponents[i]);
@@ -124,10 +93,10 @@ for (let i = 0; i < 1000000; i++) {
 
 console.timeEnd("MapComponentStorage#remove() random");
 
-console.time("ArrayStorage#remove() random");
+console.time("SparseArrayComponentStorage#remove() random");
 
 for (let i = 0; i < 1000000; i++) {
   arrayStorage.remove(Math.random() * 1000000);
 }
 
-console.timeEnd("ArrayStorage#remove() random");
+console.timeEnd("SparseArrayComponentStorage#remove() random");

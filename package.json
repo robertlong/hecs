@@ -6,9 +6,13 @@
   "license": "ISC",
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --mode development",
-    "test": "ava test/*.test.ts",
-    "bench": "ts-node ./bench/index.ts"
+    "example": "webpack-dev-server --config ./webpack.example.config.js",
+    "test": "ava",
+    "test:watch": "ava --watch",
+    "coverage": "nyc ava",
+    "bench": "npm run bench:browser",
+    "bench:node": "ts-node ./bench/index.ts",
+    "bench:browser": "webpack-dev-server --config ./webpack.bench.config.js"
   },
   "ava": {
     "compileEnhancements": false,
@@ -17,21 +21,45 @@
     ],
     "require": [
       "ts-node/register"
+    ],
+    "files": [
+      "test/**/*.test.ts"
+    ],
+    "sources": [
+      "src/**/*.ts"
     ]
   },
+  "nyc": {
+    "include": [
+      "src/**/*.ts"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "json",
+      "html"
+    ],
+    "all": true
+  },
   "dependencies": {
-    "@types/three": "^0.93.19",
+    "@types/node": "^10.12.24",
     "bitset": "^5.0.5",
-    "three": "^0.101.1"
+    "three": "git+https://github.com/mrdoob/three.js.git"
   },
   "devDependencies": {
     "ava": "^1.2.0",
     "html-webpack-plugin": "^3.2.0",
+    "nyc": "^13.2.0",
     "ts-loader": "^5.3.3",
     "ts-node": "^8.0.2",
     "typescript": "^3.3.1",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.2.1",
-    "webpack-dev-server": "^3.1.14"
+    "webpack-dev-server": "^3.1.14",
+    "webpack-merge": "^4.2.1"
   }
 }
