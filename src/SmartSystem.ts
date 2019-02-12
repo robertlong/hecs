@@ -1,6 +1,6 @@
-import { EventChannel, Query, System, World } from "./index";
+import { EventChannel, Query, System, World, ComponentConstructor, Component } from "./index";
 
-export type SystemContext = { [name: string]: EventChannel | Query };
+export type SystemContext = { [name: string]: EventChannel<Component> | Query<Component[]> };
 
 export abstract class SmartSystem<T extends SystemContext> implements System {
   world: World
@@ -8,10 +8,10 @@ export abstract class SmartSystem<T extends SystemContext> implements System {
 
   init(world: World) {
     this.world = world;
-    this.ctx = this.setup(world);
+    this.ctx = this.setup();
   }
 
-  abstract setup(world: World): T
+  abstract setup(): T
 
   abstract update(): void
   

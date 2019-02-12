@@ -2,14 +2,6 @@ import test from "ava";
 import { World, ComponentEvent } from "../src";
 import { MapComponentStorage } from "../src/MapComponentStorage";
 
-function first<T>(iterator: Iterable<T>): T {
-  return iterator[Symbol.iterator]().next().value;
-}
-
-function isEmpty<T>(iterator: Iterable<T>): boolean {
-  return iterator[Symbol.iterator]().next().done === true;
-}
-
 class TestComponent {
   value: number
   
@@ -44,7 +36,7 @@ test("World#addComponent()", t => {
 
   t.is(world.addComponent(entityId, component), component);
 
-  t.is(first(addedEvents), entityId);
+  t.deepEqual(addedEvents.first(), [entityId, component]);
 });
 
 test("World#getImmutableComponent()", t => {
@@ -62,7 +54,7 @@ test("World#getImmutableComponent()", t => {
 
   t.is(world.getImmutableComponent(entityId, TestComponent), component);
 
-  t.true(isEmpty(changedEvents));
+  t.true(changedEvents.isEmpty());
 });
 
 test("World#getMutableComponent()", t => {
@@ -80,7 +72,8 @@ test("World#getMutableComponent()", t => {
 
   t.is(world.getMutableComponent(entityId, TestComponent), component);
 
-  t.is(first(changedEvents), entityId);
+  t.deepEqual(changedEvents.first(), [entityId, component]);
+  
 });
 
 test("World#removeComponent()", t => {
@@ -100,7 +93,7 @@ test("World#removeComponent()", t => {
 
   t.is(world.removeComponent(entityId, TestComponent), true);
 
-  t.is(first(removedEvents), entityId);
+  t.deepEqual(removedEvents.first(), [entityId, undefined]);
 });
 
 test("World#hasComponent()", t => {
@@ -140,5 +133,5 @@ test("World#destroyEntity", t => {
 
   world.destroyEntity(entityId);
 
-  t.is(first(removedEvents), entityId);
+  t.deepEqual(removedEvents.first(), [entityId, undefined]);
 });

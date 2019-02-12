@@ -1,4 +1,4 @@
-import { Query, World, ComponentEvent, EventChannel } from "../src/index";
+import { Query, World, ComponentEvent, EventChannel, EntityId } from "../src/index";
 import { SmartSystem, SystemContext } from "../src/SmartSystem";
 import { MapComponentStorage } from "../src/MapComponentStorage";
 import { Scene, WebGLRenderer, PerspectiveCamera, AmbientLight, Object3D } from "three";
@@ -25,9 +25,9 @@ class Object3DComponent {
 }
 
 interface RendererSystemContext extends SystemContext {
-  renderers: Query
-  scenes: Query
-  cameras: Query
+  renderers: Query<[EntityId, WebGLRenderer]>
+  scenes: Query<[EntityId, Scene]>
+  cameras: Query<[EntityId, PerspectiveCamera]>
 }
 
 class RendererSystem extends SmartSystem<RendererSystemContext> {
@@ -40,21 +40,17 @@ class RendererSystem extends SmartSystem<RendererSystemContext> {
   }
 
   update() {
-    const rendererId = this.ctx.renderers.first();
-    const sceneId = this.ctx.scenes.first();
-    const cameraId = this.ctx.cameras.first();
-
-    const renderer = this.world.getMutableComponent(rendererId, WebGLRenderer);
-    const scene = this.world.getMutableComponent(sceneId, Scene);
-    const camera = this.world.getMutableComponent(cameraId, PerspectiveCamera);
+    const [rendererId, renderer] = this.ctx.renderers.first();
+    const [sceneId, scene] = this.ctx.scenes.first();
+    const [cameraId, camera] = this.ctx.cameras.first();
 
     renderer.render(scene, camera);
   }
 }
 
 interface GLTFLoaderSystemContext extends SystemContext {
-  scenes: Query
-  added: EventChannel
+  scenes: Query<[EntityId, Scene]>
+  added: EventChannel<ModelComponent>
 }
 
 class GLTFLoaderSystem extends SmartSystem<GLTFLoaderSystemContext> {
@@ -66,21 +62,19 @@ class GLTFLoaderSystem extends SmartSystem<GLTFLoaderSystemContext> {
   }
 
   update() {
-    for (const added of this.ctx.added) {
-      const sceneEntity = this.ctx.scenes.first();
-      const scene = this.world.getMutableComponent(sceneEntity, Scene);
-      const model = this.world.getMutableComponent(added, ModelComponent);
+    for (const [modelEntity, model] of this.ctx.added) {
+      const [sceneEntity, scene] = this.ctx.scenes.first();
       new GLTFLoader().load(model.src, gltf => {
         scene.add(gltf.scene);
-        world.addComponent(added, new Object3DComponent(gltf.scene));
-        world.addComponent(added, new RotatorComponent())
+        world.addComponent(modelEntity, new Object3DComponent(gltf.scene));
+        world.addComponent(modelEntity, new RotatorComponent())
       });
     }
   }
 }
 
 interface RotatorSystemContext extends SystemContext {
-  entities: Query
+  entities: Query<[EntityId, RotatorComponent, Object3DComponent]>
 }
 
 class RotatorSystem extends SmartSystem<RotatorSystemContext> {
@@ -91,8 +85,7 @@ class RotatorSystem extends SmartSystem<RotatorSystemContext> {
   }
 
   update() {
-    for (const entityId of this.ctx.entities) {
-      const component = this.world.getMutableComponent(entityId, Object3DComponent);
+    for (const [entityId, rotator, component] of this.ctx.entities) {
       component.object3D.rotateY(-0.05);
     }
   }

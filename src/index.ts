@@ -108,9 +108,10 @@ export class World {
   getImmutableComponent<T extends Component>(entityId: EntityId, Component: ComponentConstructor<T>): T {
     const component = this.componentStorages[Component.id].get(entityId) as T;
     
-    if (process.env.NODE_ENV = "development") {
-      Object.freeze(component);
-    }
+    // TODO: Re-enable for just the returned value somehow?
+    // if (process.env.NODE_ENV = "development") {
+    //   Object.freeze(component);
+    // }
 
     return component;
   }
@@ -163,7 +164,12 @@ export class World {
     }
   }
 
-  createQuery(...components: ComponentConstructor<Component>[]): Query {
+  createQuery<A extends Component>(a: ComponentConstructor<A>): Query<[EntityId, A]>
+  createQuery<A extends Component, B extends Component>(a: ComponentConstructor<A>, b: ComponentConstructor<B>): Query<[EntityId, A, B]>
+  createQuery<A extends Component, B extends Component, C extends Component>(a: ComponentConstructor<A>, b: ComponentConstructor<B>, c: ComponentConstructor<C>): Query<[EntityId, A, B, C]>
+  createQuery<A extends Component, B extends Component, C extends Component, D extends Component>(a: ComponentConstructor<A>, b: ComponentConstructor<B>, c: ComponentConstructor<C>, d: ComponentConstructor<C>): Query<[EntityId, A, B, C, D]>
+  createQuery<A extends Component, B extends Component, C extends Component, D extends Component, E extends Component>(a: ComponentConstructor<A>, b: ComponentConstructor<B>, c: ComponentConstructor<C>, d: ComponentConstructor<C>, e: ComponentConstructor<E>): Query<[EntityId, A, B, C, D, E]>
+  createQuery(...components: ComponentConstructor<Component>[]): Query<Component[]> {
     const self = this;
     const queryMask = new Uint32Array(this.entityMaskLength);
 
@@ -172,6 +178,12 @@ export class World {
 
     for (const Component of components) {
       queryMask[Component.maskIndex] |= Component.mask;
+    }
+
+    const results = [undefined];
+
+    for (let i = 1; i <= components.length; i++) {
+      results.push(undefined);
     }
 
     function *iterator() {
@@ -187,7 +199,13 @@ export class World {
         }
 
         if (match) {
-          yield i;
+          results[0] = i;
+
+          for (let c = 0; c < components.length; c++) {
+            results[c + 1] = self.getMutableComponent(i, components[c]);
+          }
+
+          yield results;
         }
       }
     }
@@ -206,20 +224,26 @@ export class World {
     }
   }
 
-  createEventChannel(event: ComponentEvent, Component?: ComponentConstructor<Component>): EventChannel {
+  createEventChannel<T extends Component>(event: ComponentEvent, Component?: ComponentConstructor<T>): EventChannel<T> {
     const eventQueues = this.componentEventQueues[Component.id][event];
     const eventQueue: EntityId[] = [];
     eventQueues.push(eventQueue);
+    const results = [undefined, undefined];
+    const self = this;
+
+    function* iterator() {
+      let id: EntityId;
+      while((id = eventQueue.pop()) != null){ 
+        results[0] = id;
+        results[1] = self.getImmutableComponent(id, Component);
+        yield results as [EntityId, T];  
+      }
+    }
 
     return {
-      [Symbol.iterator]: function* () {
-        let id: EntityId;
-        while((id = eventQueue.pop()) != null){ 
-          yield id;  
-        }
-      },
+      [Symbol.iterator]: iterator,
       first() {
-        return eventQueue.pop();
+        return iterator().next().value;
       },
       isEmpty() {
         return eventQueue.length === 0;
@@ -255,16 +279,16 @@ export class World {
   }
 }
 
-export interface Query {
-  [Symbol.iterator](): Iterator<EntityId>
-  first(): EntityId
+export interface Query<T extends (EntityId | Component)[]> {
+  [Symbol.iterator](): Iterator<T>
+  first(): T
   isEmpty(): boolean
   destroy(): void
 }
 
-export interface EventChannel {
-  [Symbol.iterator](): Iterator<EntityId>
-  first(): EntityId
+export interface EventChannel<T extends Component> {
+  [Symbol.iterator](): Iterator<[EntityId, T]>
+  first(): [EntityId, T]
   isEmpty(): boolean
   destroy(): void
 }

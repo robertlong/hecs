@@ -1,13 +1,13 @@
 import test from "ava";
 import { SmartSystem, SystemContext } from "../src/SmartSystem";
 import { MapComponentStorage } from "../src/MapComponentStorage"
-import { World, Query, EventChannel, ComponentEvent } from "../src";
+import { World, Query, EventChannel, ComponentEvent, EntityId } from "../src";
 
 interface TestContext extends SystemContext {
-  entities: Query
-  added: EventChannel
-  changed: EventChannel
-  removed: EventChannel
+  entities: Query<[EntityId, TestComponent, ObserverComponent]>
+  added: EventChannel<TestComponent>
+  changed: EventChannel<TestComponent>
+  removed: EventChannel<TestComponent>
 }
 
 class TestComponent {
@@ -43,24 +43,22 @@ class TestSmartSystem extends SmartSystem<TestContext> {
   }
 
   update() {
-    for (const entityId of this.ctx.entities) {
-      const testComponent = this.world.getMutableComponent(entityId, TestComponent);
-      const observerComponent = this.world.getMutableComponent(entityId, ObserverComponent);
+    for (const [entityId, testComponent, observerComponent] of this.ctx.entities) {
       testComponent.value++;
       observerComponent.frame++;
     }
   
-    for (const entityId of this.ctx.added) {
+    for (const [entityId, testComponent] of this.ctx.added) {
       const observerComponent = this.world.getMutableComponent(entityId, ObserverComponent);
       observerComponent.addedThisFrame = observerComponent.frame;
     }   
   
-    for (const entityId of this.ctx.changed) {
+    for (const [entityId, testComponent] of this.ctx.changed) {
       const observerComponent = this.world.getMutableComponent(entityId, ObserverComponent);
       observerComponent.changedThisFrame = observerComponent.frame;
     }
 
-    for (const entityId of this.ctx.removed) {
+    for (const [entityId, testComponent] of this.ctx.removed) {
       const observerComponent = this.world.getMutableComponent(entityId, ObserverComponent);
       observerComponent.removedThisFrame = observerComponent.frame + 1;
     }
