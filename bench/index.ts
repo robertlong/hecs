@@ -3,3 +3,4 @@ if (typeof document !== "undefined") {
 }
 
 require("./ComponentStorages.bench");
+require("./System.bench");
