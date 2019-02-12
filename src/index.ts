@@ -224,8 +224,49 @@ export class World {
       }
     }
 
+    function *entitiesIterator() {
+      const maskLength = self.entityMaskLength;
+      const entityCount = self.entityCount;
+      const entityFlags = self.entityFlags;
+
+      for (let i = 1; i <= entityCount; i++) {
+        let match = true;
+        
+        for (let j = 0; j < maskLength; j++) {
+          match = match && ((entityFlags[(i * maskLength) + j] & queryMask[j]) === queryMask[j]); 
+        }
+
+        if (match) {
+          yield i;
+        }
+      }
+    }
+
     return {
       [Symbol.iterator]: iterator,
+      entities: {
+        [Symbol.iterator]: entitiesIterator,
+        toArray() {
+          const entitiesArray = [];
+          const maskLength = self.entityMaskLength;
+          const entityCount = self.entityCount;
+          const entityFlags = self.entityFlags;
+
+          for (let i = 0; i < entityCount; i++) {
+            let match = true;
+        
+            for (let j = 0; j < maskLength; j++) {
+              match = match && ((entityFlags[(i * maskLength) + j] & queryMask[j]) === queryMask[j]); 
+            }
+
+            if (match) {
+              entitiesArray.push(i);
+            }
+          }
+
+          return entitiesArray;
+        } 
+      },
       first() {
         return iterator().next().value;
       },
@@ -295,6 +336,10 @@ export class World {
 
 export interface Query<T extends (EntityId | Component)[]> {
   [Symbol.iterator](): Iterator<T>
+  entities: {
+    [Symbol.iterator](): Iterator<EntityId>
+    toArray(): EntityId[]
+  },
   first(): T
   isEmpty(): boolean
   destroy(): void
