@@ -1,10 +1,10 @@
 import test from "ava";
 import { SmartSystem, SystemContext } from "../src/SmartSystem";
 import { MapComponentStorage } from "../src/MapComponentStorage"
-import { World, Query, EventChannel, ComponentEvent, EntityId } from "../src";
+import { World, Query, EventChannel, ComponentEvent, Write } from "../src";
 
 interface TestContext extends SystemContext {
-  entities: Query<[EntityId, TestComponent, ObserverComponent]>
+  entities: Query<[TestComponent, ObserverComponent]>
   added: EventChannel<TestComponent>
   changed: EventChannel<TestComponent>
   removed: EventChannel<TestComponent>
@@ -35,7 +35,7 @@ class ObserverComponent {
 class TestSmartSystem extends SmartSystem<TestContext> {
   setup() {
     return {
-      entities: this.world.createQuery(TestComponent, ObserverComponent),
+      entities: this.world.createQuery(Write(TestComponent), Write(ObserverComponent)),
       added: this.world.createEventChannel(ComponentEvent.Added, TestComponent),
       changed: this.world.createEventChannel(ComponentEvent.Changed, TestComponent),
       removed: this.world.createEventChannel(ComponentEvent.Removed, TestComponent)
@@ -43,7 +43,7 @@ class TestSmartSystem extends SmartSystem<TestContext> {
   }
 
   update() {
-    for (const [entityId, testComponent, observerComponent] of this.ctx.entities) {
+    for (const [testComponent, observerComponent] of this.ctx.entities) {
       testComponent.value++;
       observerComponent.frame++;
     }

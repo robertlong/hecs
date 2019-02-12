@@ -164,25 +164,33 @@ export class World {
     }
   }
 
-  createQuery<A extends Component>(a: ComponentConstructor<A>): Query<[EntityId, A]>
-  createQuery<A extends Component, B extends Component>(a: ComponentConstructor<A>, b: ComponentConstructor<B>): Query<[EntityId, A, B]>
-  createQuery<A extends Component, B extends Component, C extends Component>(a: ComponentConstructor<A>, b: ComponentConstructor<B>, c: ComponentConstructor<C>): Query<[EntityId, A, B, C]>
-  createQuery<A extends Component, B extends Component, C extends Component, D extends Component>(a: ComponentConstructor<A>, b: ComponentConstructor<B>, c: ComponentConstructor<C>, d: ComponentConstructor<C>): Query<[EntityId, A, B, C, D]>
-  createQuery<A extends Component, B extends Component, C extends Component, D extends Component, E extends Component>(a: ComponentConstructor<A>, b: ComponentConstructor<B>, c: ComponentConstructor<C>, d: ComponentConstructor<C>, e: ComponentConstructor<E>): Query<[EntityId, A, B, C, D, E]>
-  createQuery(...components: ComponentConstructor<Component>[]): Query<Component[]> {
+  createQuery<A>(a: QueryParameter<A>): Query<[A]>
+  createQuery<A, B>(a: QueryParameter<A>, b: QueryParameter<B>): Query<[A, B]>
+  createQuery<A, B, C>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>): Query<[A, B, C]>
+  createQuery<A, B, C, D>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>): Query<[A, B, C, D]>
+  createQuery<A, B, C, D, E>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>, e: QueryParameter<E>): Query<[A, B, C, D, E]>
+  createQuery<A, B, C, D, E, F>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>, e: QueryParameter<E>, f: QueryParameter<F>): Query<[A, B, C, D, E, F]>
+  createQuery(...parameters: QueryParameter<EntityId | Component>[]): Query<(EntityId | Component)[]> {
     const self = this;
     const queryMask = new Uint32Array(this.entityMaskLength);
+    const results = [];
+    const queryParameters = [];
 
     // Only query for active entities.
     queryMask[0] = 1;
 
-    for (const Component of components) {
-      queryMask[Component.maskIndex] |= Component.mask;
-    }
+    for (let parameter of parameters) {
+      if (typeof parameter === "function") {
+        parameter = Read(parameter);
+      }
 
-    const results = [undefined];
+      const Component = parameter.component;
 
-    for (let i = 1; i <= components.length; i++) {
+      if (Component) {
+        queryMask[Component.maskIndex] |= Component.mask;
+      }
+
+      queryParameters.push(parameter);
       results.push(undefined);
     }
 
@@ -199,10 +207,16 @@ export class World {
         }
 
         if (match) {
-          results[0] = i;
-
-          for (let c = 0; c < components.length; c++) {
-            results[c + 1] = self.getMutableComponent(i, components[c]);
+          for (let p = 0; p < queryParameters.length; p++) {
+            const parameter = queryParameters[p] as QueryOption<Component | EntityId>;
+            
+            if (parameter.entity) {
+              results[p] = i;
+            } else if (parameter.write) {
+              results[p] = self.getMutableComponent(i, parameter.component);
+            } else {
+              results[p] = self.getImmutableComponent(i, parameter.component);
+            }
           }
 
           yield results;
@@ -320,4 +334,24 @@ export interface System {
   init(world: World);
   update(): void;
   destroy(): void;
+}
+
+export type QueryParameter<T> = ComponentConstructor<T> | QueryOption<T>;
+
+export interface QueryOption<T> {
+  entity: boolean
+  write: boolean
+  component: ComponentConstructor<T> | null
+}
+
+export function Entity(): QueryOption<EntityId> {
+  return { entity: true, write: false, component: null };
+}
+
+export function Read<T>(Component: ComponentConstructor<T>): QueryOption<T> {
+  return { entity: false, write: false, component: Component };
+}
+
+export function Write<T>(Component: ComponentConstructor<T>): QueryOption<T> {
+  return { entity: false, write: true, component: Component };
 }
