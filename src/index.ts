@@ -175,6 +175,7 @@ export class World {
     const queryMask = new Uint32Array(this.entityMaskLength);
     const results = [];
     const queryParameters = [];
+    const componentStorages: ComponentStorage<Component>[] = [];
 
     // Only query for active entities.
     queryMask[0] = 1;
@@ -188,40 +189,14 @@ export class World {
 
       if (Component) {
         queryMask[Component.maskIndex] |= Component.mask;
+        componentStorages.push(this.componentStorages[Component.id]);
+      } else {
+        componentStorages.push(undefined);
       }
 
       queryParameters.push(parameter);
       results.push(undefined);
-    }
-
-    function *iteratorGenerator() {
-      const maskLength = self.entityMaskLength;
-      const entityCount = self.entityCount;
-      const entityFlags = self.entityFlags;
-
-      for (let i = 1; i <= entityCount; i++) {
-        let match = true;
-        
-        for (let j = 0; j < maskLength; j++) {
-          match = match && ((entityFlags[(i * maskLength) + j] & queryMask[j]) === queryMask[j]); 
-        }
-
-        if (match) {
-          for (let p = 0; p < queryParameters.length; p++) {
-            const parameter = queryParameters[p] as QueryOption<Component | EntityId>;
-            
-            if (parameter.entity) {
-              results[p] = i;
-            } else if (parameter.write) {
-              results[p] = self.getMutableComponent(i, parameter.component);
-            } else {
-              results[p] = self.getImmutableComponent(i, parameter.component);
-            }
-          }
-
-          yield results;
-        }
-      }
+      
     }
 
     function iterator() {
@@ -232,13 +207,15 @@ export class World {
       let i = 1;
       const result = { value: results, done: false };
 
+      
       return {
         next() {
-          if (i++ <= entityCount) {
+          while (i <= entityCount) {
             let match = true;
         
             for (let j = 0; j < maskLength; j++) {
-              match = match && ((entityFlags[(i * maskLength) + j] & queryMask[j]) === queryMask[j]); 
+              const mask = queryMask[j];
+              match = match && ((entityFlags[i * maskLength + j] & mask) === mask); 
             }
 
             if (match) {
@@ -248,67 +225,26 @@ export class World {
                 if (parameter.entity) {
                   results[p] = i;
                 } else if (parameter.write) {
-                  results[p] = self.getMutableComponent(i, parameter.component);
+                  self.pushComponentEvent(parameter.component.id, i, ComponentEvent.Changed);
+                  results[p] = componentStorages[p].get(i);
                 } else {
-                  results[p] = self.getImmutableComponent(i, parameter.component);
+                  results[p] = componentStorages[p].get(i);
                 }
               }
+              i++;
+              return result;
             }
-          } else {
-            result.done = true;
+            i++;
           }
 
+          result.done = true;
           return result;
         }
       };
     }
 
-    function *entitiesIterator() {
-      const maskLength = self.entityMaskLength;
-      const entityCount = self.entityCount;
-      const entityFlags = self.entityFlags;
-
-      for (let i = 1; i <= entityCount; i++) {
-        let match = true;
-        
-        for (let j = 0; j < maskLength; j++) {
-          match = match && ((entityFlags[(i * maskLength) + j] & queryMask[j]) === queryMask[j]); 
-        }
-
-        if (match) {
-          yield i;
-        }
-      }
-    }
-
     return {
-      [Symbol.iterator]: iteratorGenerator,
-      results: {
-        [Symbol.iterator]: iterator
-      },
-      entities: {
-        [Symbol.iterator]: entitiesIterator,
-        toArray() {
-          const entitiesArray = [];
-          const maskLength = self.entityMaskLength;
-          const entityCount = self.entityCount;
-          const entityFlags = self.entityFlags;
-
-          for (let i = 0; i < entityCount; i++) {
-            let match = true;
-        
-            for (let j = 0; j < maskLength; j++) {
-              match = match && ((entityFlags[(i * maskLength) + j] & queryMask[j]) === queryMask[j]); 
-            }
-
-            if (match) {
-              entitiesArray.push(i);
-            }
-          }
-
-          return entitiesArray;
-        } 
-      },
+      [Symbol.iterator]: iterator,
       first() {
         return iterator().next().value;
       },
@@ -325,15 +261,24 @@ export class World {
     const eventQueues = this.componentEventQueues[Component.id][event];
     const eventQueue: EntityId[] = [];
     eventQueues.push(eventQueue);
-    const results = [undefined, undefined];
+    const results = [undefined, undefined] as [EntityId, T];
     const self = this;
 
-    function* iterator() {
+    function iterator() {
       let id: EntityId;
-      while((id = eventQueue.pop()) != null){ 
-        results[0] = id;
-        results[1] = self.getImmutableComponent(id, Component);
-        yield results as [EntityId, T];  
+      const result = { value: results, done: false };
+
+      return {
+        next() {
+          if ((id = eventQueue.pop()) !== undefined) {
+            results[0] = id;
+            results[1] = self.getImmutableComponent(id, Component);
+          } else {
+            result.done = true;
+          }
+
+          return result;
+        }
       }
     }
 
@@ -378,13 +323,6 @@ export class World {
 
 export interface Query<T extends (EntityId | Component)[]> {
   [Symbol.iterator](): Iterator<T>
-  results: {
-    [Symbol.iterator](): Iterator<T>
-  },
-  entities: {
-    [Symbol.iterator](): Iterator<EntityId>
-    toArray(): EntityId[]
-  },
   first(): T
   isEmpty(): boolean
   destroy(): void

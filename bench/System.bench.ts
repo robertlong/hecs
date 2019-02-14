@@ -24,60 +24,6 @@ class BenchSystem extends SmartSystem<BenchSystemContext> {
   }
 }
 
-interface BenchCustomIteratorSystemContext extends SystemContext {
-  entities: Query<[TestComponent]>
-}
-
-class BenchCustomIteratorSystem extends SmartSystem<BenchSystemContext> {
-  setup() {
-    return {
-      entities: this.world.createQuery(TestComponent)
-    };
-  }
-
-  update() {
-    for (const [component] of this.ctx.entities.results) {
-
-    }
-  }
-}
-
-interface BenchEntitiesSystemContext extends SystemContext {
-  entities: Query<[TestComponent]>
-}
-
-class BenchEntitiesSystem extends SmartSystem<BenchEntitiesSystemContext> {
-  setup() {
-    return {
-      entities: this.world.createQuery(TestComponent)
-    };
-  }
-
-  update() {
-    for (const entityId of this.ctx.entities.entities) {
-      this.world.getImmutableComponent(entityId, TestComponent);
-    }
-  }
-}
-
-interface BenchEntitiesArraySystemContext extends SystemContext {
-  entities: Query<[TestComponent]>
-}
-
-class BenchEntitiesArraySystem extends SmartSystem<BenchEntitiesArraySystemContext> {
-  setup() {
-    return {
-      entities: this.world.createQuery(TestComponent)
-    };
-  }
-
-  update() {
-    for (const entityId of this.ctx.entities.entities.toArray()) {
-      this.world.getImmutableComponent(entityId, TestComponent);
-    }
-  }
-}
-
 interface EventChannelSystemContext extends SystemContext {
   events: EventChannel<TestComponent>
 }
@@ -131,12 +77,8 @@ async function main() {
   await waitFor(1000);
   await benchmarkSystem(new BenchSystem());
   await benchmarkSystem(new BenchSystem(), 1000, 1, 30);
-  await benchmarkSystem(new BenchCustomIteratorSystem());
-  await benchmarkSystem(new BenchCustomIteratorSystem(), 1000, 1, 30);
-  await benchmarkSystem(new BenchEntitiesSystem());
-  await benchmarkSystem(new BenchEntitiesSystem(), 1000, 1, 30);
-  await benchmarkSystem(new BenchEntitiesArraySystem());
-  await benchmarkSystem(new BenchEntitiesArraySystem(), 1000, 1, 30);
+  await benchmarkSystem(new BenchSystem(), 10000, 1, 30);
+  await benchmarkSystem(new BenchSystem(), 10000, 10, 30);
   await benchmarkSystem(new EventChannelSystem());
 }
 
