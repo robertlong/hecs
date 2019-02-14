@@ -24,6 +24,24 @@ class BenchSystem extends SmartSystem<BenchSystemContext> {
   }
 }
 
+interface BenchCustomIteratorSystemContext extends SystemContext {
+  entities: Query<[TestComponent]>
+}
+
+class BenchCustomIteratorSystem extends SmartSystem<BenchSystemContext> {
+  setup() {
+    return {
+      entities: this.world.createQuery(TestComponent)
+    };
+  }
+
+  update() {
+    for (const [component] of this.ctx.entities.results) {
+
+    }
+  }
+}
+
 interface BenchEntitiesSystemContext extends SystemContext {
   entities: Query<[TestComponent]>
 }
@@ -110,8 +128,11 @@ async function benchmarkSystem(system: System, numEntities = 1000, numUpdates = 
 
 
 async function main() {
+  await waitFor(1000);
   await benchmarkSystem(new BenchSystem());
   await benchmarkSystem(new BenchSystem(), 1000, 1, 30);
+  await benchmarkSystem(new BenchCustomIteratorSystem());
+  await benchmarkSystem(new BenchCustomIteratorSystem(), 1000, 1, 30);
   await benchmarkSystem(new BenchEntitiesSystem());
   await benchmarkSystem(new BenchEntitiesSystem(), 1000, 1, 30);
   await benchmarkSystem(new BenchEntitiesArraySystem());
@@ -119,5 +140,11 @@ async function main() {
   await benchmarkSystem(new EventChannelSystem());
 }
 
-main().catch(console.error);
+main()
+  .then(() => {
+    if (typeof document !== "undefined") {
+      document.body.innerText = "Finished.";
+    }
+  })
+  .catch(console.error);
 

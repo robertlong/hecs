@@ -194,7 +194,7 @@ export class World {
       results.push(undefined);
     }
 
-    function *iterator() {
+    function *iteratorGenerator() {
       const maskLength = self.entityMaskLength;
       const entityCount = self.entityCount;
       const entityFlags = self.entityFlags;
@@ -224,6 +224,45 @@ export class World {
       }
     }
 
+    function iterator() {
+      const maskLength = self.entityMaskLength;
+      const entityCount = self.entityCount;
+      const entityFlags = self.entityFlags;
+
+      let i = 1;
+      const result = { value: results, done: false };
+
+      return {
+        next() {
+          if (i++ <= entityCount) {
+            let match = true;
+        
+            for (let j = 0; j < maskLength; j++) {
+              match = match && ((entityFlags[(i * maskLength) + j] & queryMask[j]) === queryMask[j]); 
+            }
+
+            if (match) {
+              for (let p = 0; p < queryParameters.length; p++) {
+                const parameter = queryParameters[p] as QueryOption<Component | EntityId>;
+                
+                if (parameter.entity) {
+                  results[p] = i;
+                } else if (parameter.write) {
+                  results[p] = self.getMutableComponent(i, parameter.component);
+                } else {
+                  results[p] = self.getImmutableComponent(i, parameter.component);
+                }
+              }
+            }
+          } else {
+            result.done = true;
+          }
+
+          return result;
+        }
+      };
+    }
+
     function *entitiesIterator() {
       const maskLength = self.entityMaskLength;
       const entityCount = self.entityCount;
@@ -243,7 +282,10 @@ export class World {
     }
 
     return {
-      [Symbol.iterator]: iterator,
+      [Symbol.iterator]: iteratorGenerator,
+      results: {
+        [Symbol.iterator]: iterator
+      },
       entities: {
         [Symbol.iterator]: entitiesIterator,
         toArray() {
@@ -336,6 +378,9 @@ export class World {
 
 export interface Query<T extends (EntityId | Component)[]> {
   [Symbol.iterator](): Iterator<T>
+  results: {
+    [Symbol.iterator](): Iterator<T>
+  },
   entities: {
     [Symbol.iterator](): Iterator<EntityId>
     toArray(): EntityId[]
