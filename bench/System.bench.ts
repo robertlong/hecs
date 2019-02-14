@@ -80,6 +80,9 @@ async function main() {
   await benchmarkSystem(new BenchSystem(), 10000, 1, 30);
   await benchmarkSystem(new BenchSystem(), 10000, 10, 30);
   await benchmarkSystem(new EventChannelSystem());
+  await benchmarkSystem(new EventChannelSystem(), 1000, 1, 30);
+  await benchmarkSystem(new EventChannelSystem(), 10000, 1, 30);
+  await benchmarkSystem(new EventChannelSystem(), 10000, 10, 30);
 }
 
 main()
