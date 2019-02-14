@@ -262,7 +262,7 @@ export class World {
     const eventQueue: EntityId[] = [];
     eventQueues.push(eventQueue);
     const results = [undefined, undefined] as [EntityId, T];
-    const self = this;
+    const componentStorage = this.componentStorages[Component.id];
 
     function iterator() {
       let id: EntityId;
@@ -272,7 +272,7 @@ export class World {
         next() {
           if ((id = eventQueue.pop()) !== undefined) {
             results[0] = id;
-            results[1] = self.getImmutableComponent(id, Component);
+            results[1] = componentStorage.get(id) as T;
           } else {
             result.done = true;
           }
