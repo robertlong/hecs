@@ -22,6 +22,17 @@
  * 
  **/
 
+let wrapImmutableComponent;
+if (process.env.NODE_ENV === "development") {
+  wrapImmutableComponent = function(component: Component) {
+    return new Proxy(component, {
+      set(component, prop) {
+        throw new Error(`Tried to write to "${component.constructor.name}#${String(prop)}" on immutable component. Use Write() or .getMutableComponent() to write to a component.`);
+      }
+    });
+  }
+}
+
 export class World {
   protected entityPool: EntityId[];
   protected entityCount: EntityId;
@@ -65,7 +76,7 @@ export class World {
       newEntityFlags.set(this.entityFlags);
       this.entityFlags = newEntityFlags;
     }
-    
+
     this.entityFlags[maskIndex] = 1;
     
     return entityId;
@@ -126,12 +137,11 @@ export class World {
   }
 
   getImmutableComponent<T extends Component>(entityId: EntityId, Component: ComponentConstructor<T>): T {
-    const component = this.componentStorages[Component.id].get(entityId) as T;
-    
-    // TODO: Re-enable for just the returned value somehow?
-    // if (process.env.NODE_ENV = "development") {
-    //   Object.freeze(component);
-    // }
+    let component = this.componentStorages[Component.id].get(entityId) as T;
+
+    if (process.env.NODE_ENV === "development") {
+      component = wrapImmutableComponent(component);
+    }
 
     return component;
   }
@@ -248,7 +258,13 @@ export class World {
                   self.pushComponentEvent(parameter.component.id, i, ComponentEvent.Changed);
                   results[p] = componentStorages[p].get(i);
                 } else {
-                  results[p] = componentStorages[p].get(i);
+                  let component = componentStorages[p].get(i);
+
+                  if (process.env.NODE_ENV === "development") {
+                    component = wrapImmutableComponent(component)
+                  }
+
+                  results[p] = component;
                 }
               }
               i++;

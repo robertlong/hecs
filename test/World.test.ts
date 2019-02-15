@@ -60,9 +60,14 @@ test("World#getImmutableComponent()", t => {
 
   world.addComponent(entityId, component);
 
-  t.is(world.getImmutableComponent(entityId, TestComponent), component);
+  t.is(world.getImmutableComponent(entityId, TestComponent).value, component.value);
 
   t.true(changedEvents.isEmpty());
+
+  t.throws(() => {
+    const immutableComponent = world.getImmutableComponent(entityId, TestComponent)
+    immutableComponent.value = 999;
+  }, /immutable/g)
 });
 
 test("World#getMutableComponent()", t => {
@@ -81,6 +86,11 @@ test("World#getMutableComponent()", t => {
   t.is(world.getMutableComponent(entityId, TestComponent), component);
 
   t.deepEqual(changedEvents.first(), [entityId, component]);
+
+  t.notThrows(() => {
+    const mutableComponent = world.getMutableComponent(entityId, TestComponent);
+    mutableComponent.value = 999;
+  });
   
 });
 
@@ -97,7 +107,7 @@ test("World#removeComponent()", t => {
 
   world.addComponent(entityId, component);
 
-  t.is(world.getImmutableComponent(entityId, TestComponent), component);
+  t.is(world.getImmutableComponent(entityId, TestComponent).value, component.value);
 
   t.is(world.removeComponent(entityId, TestComponent), true);
 
@@ -137,7 +147,7 @@ test("World#destroyEntity", t => {
 
   world.addComponent(entityId, component);
 
-  t.is(world.getImmutableComponent(entityId, TestComponent), component);
+  t.is(world.getImmutableComponent(entityId, TestComponent).value, component.value);
 
   world.destroyEntity(entityId);
 
