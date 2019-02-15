@@ -13,6 +13,14 @@ class TestComponent {
 test("World#createEntity()", t => {
   const world = new World();
   t.is(world.createEntity(), 1);
+
+  // Test expanding the entityFlags typed array
+  for (let i = 0; i < 1024; i++) {
+    world.createEntity();
+  }
+  t.true(world.isAlive(1));
+  t.true(world.isAlive(1024));
+  t.true(world.isAlive(1025));
 });
 
 test("World#registerComponent()", t => {

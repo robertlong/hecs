@@ -25,7 +25,7 @@
 export class World {
   protected entityPool: EntityId[];
   protected entityCount: EntityId;
-  protected entityFlags: Int32Array;
+  protected entityFlags: Uint32Array;
   protected entityMaskLength: number;
   protected componentConstructors: ComponentConstructor<Component>[];
   protected componentStorages: ComponentStorage<Component>[];
@@ -41,9 +41,8 @@ export class World {
   constructor() {
     this.entityPool = [];
     this.entityCount = 0;
-    // TODO: make entity flags not a fixed size
-    this.entityFlags = new Int32Array(1024);
-    this.entityMaskLength = 0;
+    this.entityFlags = new Uint32Array(1024);
+    this.entityMaskLength = 1;
     this.componentConstructors = [];
     this.componentStorages = [];
     this.componentEventQueues = {};
@@ -60,9 +59,14 @@ export class World {
     }
 
     const maskIndex = entityId * this.entityMaskLength;
-    this.entityFlags[maskIndex] = 1;
 
-    // TODO: Expand entity flags if needed and update associated data.
+    if (maskIndex >= this.entityFlags.length) {
+      const newEntityFlags = new Uint32Array(this.entityFlags.length + 1024);
+      newEntityFlags.set(this.entityFlags);
+      this.entityFlags = newEntityFlags;
+    }
+    
+    this.entityFlags[maskIndex] = 1;
     
     return entityId;
   }
@@ -83,12 +87,15 @@ export class World {
     this.entityPool.push(entityId);
   }
 
+  isAlive(entityId: EntityId) {
+    return (this.entityFlags[entityId * this.entityMaskLength] & 1) === 1;
+  }
+
   registerComponent<T extends Component>(Component: ComponentConstructor<T>, storage: ComponentStorage<T>) {
     const maskSize = this.componentStorages.length + 1;
     const id = Component.id = maskSize;
     Component.maskIndex = Math.floor(maskSize / 32);
     Component.mask = 1 << (maskSize % 32);
-    this.entityMaskLength = Math.ceil(maskSize / 32);
     this.componentStorages[id] = storage;
     this.componentConstructors.push(Component);
     this.componentEventQueues[id] = {
@@ -97,6 +104,19 @@ export class World {
       [ComponentEvent.Changed]: []
     };
     // TODO: Expand entity flags if needed and update associated data.
+
+    // const nextEntityMaskLength = Math.ceil(maskSize / 32);
+
+    // if (nextEntityMaskLength !== this.entityMaskLength) {
+    //   const newEntityFlags = new Uint32Array(this.entityFlags.length / this.entityMaskLength);
+
+    //   for (let i = 0; i < this.entityCount; i++) {
+
+    //   }
+
+    //   this.entityFlags = newEntityFlags;
+    //   this.entityMaskLength = nextEntityMaskLength;
+    // }
   }
 
   hasComponent(entityId: EntityId, Component: ComponentConstructor<Component>) {
