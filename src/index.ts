@@ -103,8 +103,9 @@ export class World {
   }
 
   registerComponent<T extends Component>(Component: ComponentConstructor<T>, storage: ComponentStorage<T>) {
-    const maskSize = this.componentStorages.length + 1;
-    const id = Component.id = maskSize;
+    const numComponents = this.componentStorages.length;
+    const maskSize = numComponents + 1;
+    const id = Component.id = numComponents;
     Component.maskIndex = Math.floor(maskSize / 32);
     Component.mask = 1 << (maskSize % 32);
     this.componentStorages[id] = storage;
@@ -114,20 +115,26 @@ export class World {
       [ComponentEvent.Removed]: [],
       [ComponentEvent.Changed]: []
     };
-    // TODO: Expand entity flags if needed and update associated data.
 
-    // const nextEntityMaskLength = Math.ceil(maskSize / 32);
+    const prevEntityMaskLength = this.entityMaskLength;
+    const nextEntityMaskLength = Math.ceil(maskSize / 32);
 
-    // if (nextEntityMaskLength !== this.entityMaskLength) {
-    //   const newEntityFlags = new Uint32Array(this.entityFlags.length / this.entityMaskLength);
+    if (nextEntityMaskLength !== prevEntityMaskLength) {
+      const numEntities = this.entityFlags.length / prevEntityMaskLength;
+      const prevEntityFlags = this.entityFlags;
+      const nextEntityFlags = new Uint32Array(numEntities * nextEntityMaskLength);
 
-    //   for (let i = 0; i < this.entityCount; i++) {
+      for (let i = 0; i < numEntities; i++) {
+        for (let j = 0; j < prevEntityMaskLength; j++) {
+          const oldIndex = i * prevEntityMaskLength + j;
+          const newIndex = i * nextEntityMaskLength + j;
+          nextEntityFlags[newIndex] = prevEntityFlags[oldIndex];
+        }
+      }
 
-    //   }
-
-    //   this.entityFlags = newEntityFlags;
-    //   this.entityMaskLength = nextEntityMaskLength;
-    // }
+      this.entityFlags = nextEntityFlags;
+      this.entityMaskLength = nextEntityMaskLength;
+    }
   }
 
   hasComponent(entityId: EntityId, Component: ComponentConstructor<Component>) {

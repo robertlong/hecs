@@ -1,5 +1,5 @@
 import test from "ava";
-import { World, ComponentEvent } from "../src";
+import { World, ComponentEvent, Component, ComponentConstructor, Entity } from "../src";
 import { MapComponentStorage } from "../src/MapComponentStorage";
 
 class TestComponent {
@@ -7,6 +7,20 @@ class TestComponent {
   
   constructor(value: number) {
     this.value = value;
+  }
+}
+
+class TestWorld extends World {
+  getEntityFlags() {
+    return this.entityFlags;
+  }
+
+  getEntityMaskLength() {
+    return this.entityMaskLength;
+  }
+
+  getComponentStorages() {
+    return this.componentStorages;
   }
 }
 
@@ -24,11 +38,34 @@ test("World#createEntity()", t => {
 });
 
 test("World#registerComponent()", t => {
-  const world = new World();
+  const world = new TestWorld();
 
   world.registerComponent(TestComponent, new MapComponentStorage());
 
-  t.pass();
+  const entity = world.createEntity();
+  world.addComponent(entity, new TestComponent(123));
+
+  t.is(world.getEntityFlags().length, 1024);
+  t.is(world.getEntityMaskLength(), 1);
+
+  let Component;
+
+  for (let i = 0; i < 32; i++) {
+    Component = class implements Component {};
+    world.registerComponent(Component, new MapComponentStorage());
+  }
+
+  t.is(world.getComponentStorages().length, 33);
+  t.is(Component.id, 32);
+
+  world.addComponent(entity, new Component());
+
+  const entityFlags = world.getEntityFlags();
+  t.is(entityFlags.length, 2048);
+  t.is(entityFlags[2], 0b11);
+  t.is(entityFlags[3], 0b10);
+  t.is(world.getEntityMaskLength(), 2);
+  t.is(world.getImmutableComponent(entity, TestComponent).value, 123);
 });
 
 test("World#addComponent()", t => {
