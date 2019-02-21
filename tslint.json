@@ -1,0 +1,11 @@
+{
+  "extends": [
+    "tslint:latest",
+    "tslint-config-prettier"
+  ],
+  "rules": {
+    "prefer-for-of": false,
+    "no-implicit-dependencies": false,
+    "max-classes-per-file": false
+  }
+}

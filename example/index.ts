@@ -1,9 +1,9 @@
-import { World, System, EntityId, TEntityId, Read, Write, SystemContext, Query } from "hecs";
+import { EntityId, IQuery, ISystemContext, Read, System, TEntityId, World, Write } from "hecs";
 
 const world = new World();
 
 class Position {
-  x: number;
+  public x: number;
 
   constructor(x: number) {
     this.x = x;
@@ -11,7 +11,7 @@ class Position {
 }
 
 class Velocity {
-  v: number;
+  public v: number;
 
   constructor(v: number) {
     this.v = v;
@@ -21,37 +21,38 @@ class Velocity {
 world.registerComponent(Position);
 world.registerComponent(Velocity);
 
-interface VelocitySystemContext extends SystemContext {
-  entities: Query<[Position, Velocity]>
+interface IVelocitySystemContext extends ISystemContext {
+  entities: IQuery<[Position, Velocity]>
 }
 
-class VelocitySystem extends System<VelocitySystemContext> {
-  setup() {
+class VelocitySystem extends System<IVelocitySystemContext> {
+  public setup() {
     return {
       entities: this.world.createQuery(Write(Position), Read(Velocity))
     };
   }
 
-  update() {
+  public update() {
     for (const [position, velocity] of this.ctx.entities) {
       position.x += velocity.v;
     }
   }
 }
 
-interface LoggingSystemContext extends SystemContext {
-  entities: Query<[TEntityId, Position]>
+interface ILoggingSystemContext extends ISystemContext {
+  entities: IQuery<[TEntityId, Position]>
 }
 
-class LoggingSystem extends System<LoggingSystemContext> {
-  setup() {
+class LoggingSystem extends System<ILoggingSystemContext> {
+  public setup() {
     return {
       entities: this.world.createQuery(EntityId, Read(Position))
     };
   }
 
-  update() {
+  public update() {
     for (const [entityId, position] of this.ctx.entities) {
+      // tslint:disable-next-line: no-console
       console.log(`Entity ${entityId} has position: ${position.x}`);
     }
   }

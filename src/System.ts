@@ -1,26 +1,30 @@
-import { EventChannel, Query, ISystem, World, Component } from "./index";
+import { IComponent, IEventChannel, IQuery, ISystem, World } from "./index";
 
-export type SystemContext = { [name: string]: EventChannel<Component> | Query<Component[]> };
+export interface ISystemContext {
+  [name: string]: IEventChannel<IComponent> | IQuery<IComponent[]>
+}
 
 /**
  * The default System class that automatically destroys its query objects.
  */
-export abstract class System<T extends SystemContext> implements ISystem {
-  world: World
-  ctx: T
+export abstract class System<T extends ISystemContext> implements ISystem {
+  public world: World
+  public ctx: T
 
-  init(world: World) {
+  public init(world: World) {
     this.world = world;
     this.ctx = this.setup();
   }
 
-  abstract setup(): T
+  public abstract setup(): T
 
-  abstract update(): void
+  public abstract update(): void
   
-  destroy() {
+  public destroy() {
     for (const key in this.ctx) {
-      this.ctx[key].destroy();
+      if (this.ctx.hasOwnProperty(key)) {
+        this.ctx[key].destroy();
+      }
     }
   }
 }

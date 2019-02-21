@@ -1,3 +1,4 @@
+// tslint:disable: no-console
 import { MapComponentStorage, SparseArrayComponentStorage } from "../src";
 
 const mapStorage = new MapComponentStorage();

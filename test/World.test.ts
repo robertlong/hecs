@@ -1,8 +1,8 @@
 import test from "ava";
-import { World, ComponentEvent, Component, ComponentConstructor, MapComponentStorage } from "../src";
+import { ComponentEvent, IComponent, IComponentConstructor, MapComponentStorage, World } from "../src";
 
 class TestComponent {
-  value: number
+  public value: number
   
   constructor(value: number) {
     this.value = value;
@@ -10,15 +10,15 @@ class TestComponent {
 }
 
 class TestWorld extends World {
-  getEntityFlags() {
+  public getEntityFlags() {
     return this.entityFlags;
   }
 
-  getEntityMaskLength() {
+  public getEntityMaskLength() {
     return this.entityMaskLength;
   }
 
-  getComponentStorages() {
+  public getComponentStorages() {
     return this.componentStorages;
   }
 }
@@ -47,10 +47,10 @@ test("World#registerComponent()", t => {
   t.is(world.getEntityFlags().length, 1024);
   t.is(world.getEntityMaskLength(), 1);
 
-  let Component: ComponentConstructor<Component>;
+  let Component: IComponentConstructor<IComponent>;
 
   for (let i = 0; i < 32; i++) {
-    Component = class implements Component {};
+    Component = class implements IComponent {};
     world.registerComponent(Component, new MapComponentStorage());
   }
 
@@ -158,8 +158,6 @@ test("World#hasComponent()", t => {
   const entityId = world.createEntity();
 
   const component = new TestComponent(123);
-
-  debugger;
 
   world.addComponent(entityId, component);
 

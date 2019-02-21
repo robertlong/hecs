@@ -1,30 +1,11 @@
-/**
- * Bitset for each entity can be stored in a single typed array / array buffer
- * for the best data locality when iterating through entities. Data for each entity
- * is stored in one or more 32 bit chunks for fast iteration per entity.
- * 
- * Uint32Array: |     0      |       1          |       2          | ... |    32     | ...
- *              |  Entity 0  |  Component.id 0  |  Component.id 1  | ... | Entity 1  | ...
- * Entity Flag: 0 = Inactive, 1 = Active
- * Component Flag: 0 = Inactive, 1 = Active
- * 
- * Entity matches query when: 
- * let match = true;
- * for (let i = 0; i < queryMask.length; i++) {
- *  match = match && (entityMask[entityId + i] & queryMask[i] === queryMask[i]); 
- * }
- * return match;
- * 
- **/
-
 import { MapComponentStorage } from "./MapComponentStorage";
 
-let wrapImmutableComponent: <T extends Component>(component: T) => T;
+let wrapImmutableComponent: <T extends IComponent>(component: T) => T;
 if (process.env.NODE_ENV === "development") {
-  wrapImmutableComponent = function<T>(component: T): T {
+  wrapImmutableComponent = <T>(component: T): T => {
     return new Proxy(component as unknown as object, {
-      set(component: Component, prop: string) {
-        throw new Error(`Tried to write to "${component.constructor.name}#${String(prop)}" on immutable component. Use Write() or .getMutableComponent() to write to a component.`);
+      set(target: IComponent, prop: string) {
+        throw new Error(`Tried to write to "${target.constructor.name}#${String(prop)}" on immutable component. Use Write() or .getMutableComponent() to write to a component.`);
       }
     }) as T;
   }
@@ -33,10 +14,20 @@ if (process.env.NODE_ENV === "development") {
 export class World {
   protected entityPool: TEntityId[];
   protected entityCount: TEntityId;
+  /**
+   * Bitset for each entity can be stored in a single typed array / array buffer
+   * for the best data locality when iterating through entities. Data for each entity
+   * is stored in one or more 32 bit chunks for fast iteration per entity.
+   * 
+   * Uint32Array: |     0      |       1          |       2          | ... |    32     | ...
+   *              |  Entity 0  |  Component.id 0  |  Component.id 1  | ... | Entity 1  | ...
+   * Entity Flag: 0 = Inactive, 1 = Active
+   * Component Flag: 0 = Inactive, 1 = Active
+   */
   protected entityFlags: Uint32Array;
   protected entityMaskLength: number;
-  protected componentConstructors: ComponentConstructor<Component>[];
-  protected componentStorages: ComponentStorage<Component>[];
+  protected componentConstructors: Array<IComponentConstructor<IComponent>>;
+  protected componentStorages: Array<IComponentStorage<IComponent>>;
   protected componentEventQueues: {
     [componentId: number]: {
       [ComponentEvent.Added]: number[][]
@@ -60,15 +51,8 @@ export class World {
   /**
    * Create an entity in the world.
    */
-  createEntity() {
-    let entityId: TEntityId;
-
-    if (this.entityPool.length > 0) {
-      entityId = this.entityPool.pop();
-    } else {
-      entityId = ++this.entityCount;
-    }
-
+  public createEntity() {
+    const entityId = this.entityPool.length > 0 ? this.entityPool.pop() : ++this.entityCount;
     const maskIndex = entityId * this.entityMaskLength;
 
     if (maskIndex >= this.entityFlags.length) {
@@ -85,7 +69,7 @@ export class World {
   /**
    * Destroy an entity.
    */
-  destroyEntity(entityId: TEntityId) {
+  public destroyEntity(entityId: TEntityId) {
     const entityFlags = this.entityFlags;
     const entityMaskLength = this.entityMaskLength;
 
@@ -104,20 +88,22 @@ export class World {
   /**
    * Returns true if an entity has been created and has not been destroyed.
    */
-  isAlive(entityId: TEntityId) {
+  public isAlive(entityId: TEntityId) {
+    // tslint:disable-next-line: no-bitwise
     return (this.entityFlags[entityId * this.entityMaskLength] & 1) === 1;
   }
 
   /**
    * Register a component class and storage with the world so that it can be queried.
    */
-  registerComponent<T extends Component>(Component: ComponentConstructor<T>, storage?: ComponentStorage<T>) {
+  public registerComponent<T extends IComponent>(Component: IComponentConstructor<T>, storage?: IComponentStorage<T>) {
     storage = storage || new MapComponentStorage();
     
     const numComponents = this.componentStorages.length;
     const maskSize = numComponents + 1;
     const id = Component.id = numComponents;
     Component.maskIndex = Math.floor(maskSize / 32);
+    // tslint:disable-next-line: no-bitwise
     Component.mask = 1 << (maskSize % 32);
     this.componentStorages[id] = storage;
     this.componentConstructors.push(Component);
@@ -151,9 +137,10 @@ export class World {
   /**
    * Returns true if an entity has the provided component.
    */
-  hasComponent(entityId: TEntityId, Component: ComponentConstructor<Component>) {
+  public hasComponent(entityId: TEntityId, Component: IComponentConstructor<IComponent>) {
     const maskIndex = (entityId * this.entityMaskLength) + Component.maskIndex;
     const componentMask =  Component.mask;
+    // tslint:disable-next-line: no-bitwise
     return (this.entityFlags[maskIndex] & componentMask) === componentMask;
   }
 
@@ -163,7 +150,7 @@ export class World {
    * @remarks In development mode, in order to throw an error when an immutable component is mutated,
    * this method returns a proxy of the component, not the original component.
    */
-  getImmutableComponent<T extends Component>(entityId: TEntityId, Component: ComponentConstructor<T>): T {
+  public getImmutableComponent<T extends IComponent>(entityId: TEntityId, Component: IComponentConstructor<T>): T {
     let component = this.componentStorages[Component.id].get(entityId) as T;
 
     if (process.env.NODE_ENV === "development") {
@@ -178,7 +165,7 @@ export class World {
    * 
    * @remarks A ComponentEvent.Changed event is pushed to any EventChannels for this component.
    */
-  getMutableComponent<T extends Component>(entityId: TEntityId, Component: ComponentConstructor<T>): T {
+  public getMutableComponent<T extends IComponent>(entityId: TEntityId, Component: IComponentConstructor<T>): T {
     const componentId = Component.id;
     this.pushComponentEvent(componentId, entityId, ComponentEvent.Changed);
     return this.componentStorages[componentId].get(entityId) as T;
@@ -189,13 +176,14 @@ export class World {
    * 
    * @remarks A ComponentEvent.Added event is pushed to any EventChannels for this component.
    */
-  addComponent<T extends Component>(entityId: TEntityId, component: T): T {
-    const Component = component.constructor as ComponentConstructor<T>;
+  public addComponent<T extends IComponent>(entityId: TEntityId, component: T): T {
+    const Component = component.constructor as IComponentConstructor<T>;
     const componentId = Component.id;
 
     if (!this.hasComponent(entityId, Component)) {
       const maskIndex = (entityId * this.entityMaskLength) + Component.maskIndex;
-      const componentMask =  Component.mask; 
+      const componentMask =  Component.mask;
+      // tslint:disable-next-line: no-bitwise
       this.entityFlags[maskIndex] |= componentMask;
       this.pushComponentEvent(componentId, entityId, ComponentEvent.Added);
       return this.componentStorages[Component.id].set(entityId, component) as T;
@@ -209,12 +197,13 @@ export class World {
    * 
    * @remarks A ComponentEvent.Removed event is pushed to any EventChannels for this component.
    */
-  removeComponent(entityId: TEntityId, Component: ComponentConstructor<Component>) {
+  public removeComponent(entityId: TEntityId, Component: IComponentConstructor<IComponent>) {
     const componentId = Component.id;
     
     if (this.componentStorages[componentId].remove(entityId)) {
       const maskIndex = (entityId * this.entityMaskLength) + Component.maskIndex;
       const componentMask =  Component.mask;
+      // tslint:disable-next-line: no-bitwise
       this.entityFlags[maskIndex] &= ~componentMask;
       this.pushComponentEvent(componentId, entityId, ComponentEvent.Removed);
       return true;
@@ -223,36 +212,24 @@ export class World {
     return false;
   }
 
-  protected pushComponentEvent(componentId: number, entityId: number, event: ComponentEvent) {
-    const componentEventQueues = this.componentEventQueues[componentId];
-    if (componentEventQueues) {
-      const changedEventQueues = componentEventQueues[event];
-
-      if (changedEventQueues) {
-        for (let i = 0; i < changedEventQueues.length; i++) {
-          changedEventQueues[i].push(entityId);
-        }
-      }
-    }
-  }
-
   /**
    * Create a query for the provided QueryParameters.
    * 
    * @remarks See EntityId, Read, and Write for details on the different QueryParameters.
    */
-  createQuery<A>(a: QueryParameter<A>): Query<[A]>
-  createQuery<A, B>(a: QueryParameter<A>, b: QueryParameter<B>): Query<[A, B]>
-  createQuery<A, B, C>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>): Query<[A, B, C]>
-  createQuery<A, B, C, D>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>): Query<[A, B, C, D]>
-  createQuery<A, B, C, D, E>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>, e: QueryParameter<E>): Query<[A, B, C, D, E]>
-  createQuery<A, B, C, D, E, F>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>, e: QueryParameter<E>, f: QueryParameter<F>): Query<[A, B, C, D, E, F]>
-  createQuery(...parameters: QueryParameter<TEntityId | Component>[]): Query<(TEntityId | Component)[]> {
+  public createQuery<A>(a: TQueryParameter<A>): IQuery<[A]>
+  public createQuery<A, B>(a: TQueryParameter<A>, b: TQueryParameter<B>): IQuery<[A, B]>
+  public createQuery<A, B, C>(a: TQueryParameter<A>, b: TQueryParameter<B>, c: TQueryParameter<C>): IQuery<[A, B, C]>
+  public createQuery<A, B, C, D>(a: TQueryParameter<A>, b: TQueryParameter<B>, c: TQueryParameter<C>, d: TQueryParameter<C>): IQuery<[A, B, C, D]>
+  public createQuery<A, B, C, D, E>(a: TQueryParameter<A>, b: TQueryParameter<B>, c: TQueryParameter<C>, d: TQueryParameter<C>, e: TQueryParameter<E>): IQuery<[A, B, C, D, E]>
+  public createQuery<A, B, C, D, E, F>(a: TQueryParameter<A>, b: TQueryParameter<B>, c: TQueryParameter<C>, d: TQueryParameter<C>, e: TQueryParameter<E>, f: TQueryParameter<F>): IQuery<[A, B, C, D, E, F]>
+  public createQuery(...parameters: Array<TQueryParameter<TEntityId | IComponent>>): IQuery<Array<TEntityId | IComponent>> {
+    // tslint:disable-next-line no-this-assignment
     const self = this;
     const queryMask = new Uint32Array(this.entityMaskLength);
-    const results: (TEntityId | Component)[] = [];
-    const queryParameters: (TEntityId | Component)[] = [];
-    const componentStorages: ComponentStorage<Component>[] = [];
+    const results: Array<TEntityId | IComponent> = [];
+    const queryParameters: Array<TEntityId | IComponent> = [];
+    const componentStorages: Array<IComponentStorage<IComponent>> = [];
 
     // Only query for active entities.
     queryMask[0] = 1;
@@ -265,6 +242,7 @@ export class World {
       const Component = parameter.component;
 
       if (Component) {
+        // tslint:disable-next-line: no-bitwise
         queryMask[Component.maskIndex] |= Component.mask;
         componentStorages.push(this.componentStorages[Component.id]);
       } else {
@@ -292,12 +270,13 @@ export class World {
         
             for (let j = 0; j < maskLength; j++) {
               const mask = queryMask[j];
+              // tslint:disable-next-line: no-bitwise
               match = match && ((entityFlags[i * maskLength + j] & mask) === mask); 
             }
 
             if (match) {
               for (let p = 0; p < queryParameters.length; p++) {
-                const parameter = queryParameters[p] as QueryOption<Component | TEntityId>;
+                const parameter = queryParameters[p] as IQueryOption<IComponent | TEntityId>;
                 
                 if (parameter.entity) {
                   results[p] = i;
@@ -334,16 +313,15 @@ export class World {
       isEmpty() {
         return iterator().next().done;
       },
-      destroy() {
-
-      }
+      // tslint:disable-next-line: no-empty
+      destroy() {}
     }
   }
 
   /**
    * Create an event channel for the provided ComponentEvent and Component.
    */
-  createEventChannel<T extends Component>(event: ComponentEvent, Component?: ComponentConstructor<T>): EventChannel<T> {
+  public createEventChannel<T extends IComponent>(event: ComponentEvent, Component?: IComponentConstructor<T>): IEventChannel<T> {
     const eventQueues = this.componentEventQueues[Component.id][event];
     const eventQueue: TEntityId[] = [];
     eventQueues.push(eventQueue);
@@ -356,6 +334,7 @@ export class World {
 
       return {
         next() {
+          // tslint:disable-next-line: no-conditional-assignment
           if ((id = eventQueue.pop()) !== undefined) {
             results[0] = id;
             results[1] = componentStorage.get(id) as T;
@@ -388,7 +367,7 @@ export class World {
    * 
    * @remarks Systems are updated in the order they are registered.
    */
-  registerSystem(system: ISystem) {
+  public registerSystem(system: ISystem) {
     this.systems.push(system);
     system.init(this);
   }
@@ -396,7 +375,7 @@ export class World {
   /**
    * Update all systems registered with the world.
    */
-  update() {
+  public update() {
     for (let i = 0; i < this.systems.length; i++) {
       this.systems[i].update();
     }
@@ -405,7 +384,7 @@ export class World {
   /**
    * Unregister the system. The system's destroy method will be called.
    */
-  unregisterSystem(system: ISystem) {
+  public unregisterSystem(system: ISystem) {
     const index = this.systems.indexOf(system);
     this.systems[index].destroy();
     this.systems.splice(index, 1);
@@ -414,21 +393,34 @@ export class World {
   /**
    * Destroy the world and all registered systems.
    */
-  destroy() {
+  public destroy() {
     for (const system of this.systems) {
       system.destroy();
     }
   }
+
+  protected pushComponentEvent(componentId: number, entityId: number, event: ComponentEvent) {
+    const componentEventQueues = this.componentEventQueues[componentId];
+    if (componentEventQueues) {
+      const changedEventQueues = componentEventQueues[event];
+
+      if (changedEventQueues) {
+        for (let i = 0; i < changedEventQueues.length; i++) {
+          changedEventQueues[i].push(entityId);
+        }
+      }
+    }
+  }
 }
 
-export interface Query<T extends (TEntityId | Component)[]> {
+export interface IQuery<T extends Array<TEntityId | IComponent>> {
   [Symbol.iterator](): Iterator<T>
   first(): T
   isEmpty(): boolean
   destroy(): void
 }
 
-export interface EventChannel<T extends Component> {
+export interface IEventChannel<T extends IComponent> {
   [Symbol.iterator](): Iterator<[TEntityId, T]>
   first(): [TEntityId, T]
   isEmpty(): boolean
@@ -443,16 +435,17 @@ export enum ComponentEvent {
 
 export type TEntityId = number;
 
-export interface ComponentConstructor<T extends Component> {
+export interface IComponentConstructor<T extends IComponent> {
   id?: number
   maskIndex?: number
   mask?: number
   new(...args: any[]): T
 }
 
-export interface Component {}
+// tslint:disable-next-line: no-empty-interface
+export interface IComponent {}
 
-export interface ComponentStorage<T extends Component> {
+export interface IComponentStorage<T extends IComponent> {
   get(entityId: TEntityId): T | undefined
   set(entityId: TEntityId, component: T): T
   remove(entityId: TEntityId): boolean
@@ -464,34 +457,34 @@ export interface ISystem {
   destroy(): void;
 }
 
-export type QueryParameter<T> = ComponentConstructor<T> | QueryOption<T>;
+export type TQueryParameter<T> = IComponentConstructor<T> | IQueryOption<T>;
 
-export interface QueryOption<T> {
+export interface IQueryOption<T> {
   entity: boolean
   write: boolean
-  component: ComponentConstructor<T> | null
+  component: IComponentConstructor<T> | null
 }
 
 /**
  * Query an entity id.
  */
-export const EntityId: QueryOption<TEntityId> = { entity: true, write: false, component: null };
+export const EntityId: IQueryOption<TEntityId> = { entity: true, write: false, component: null };
 
 /**
  * Query a component as read only.
  */
-export function Read<T>(Component: ComponentConstructor<T>): QueryOption<T> {
+export function Read<T>(Component: IComponentConstructor<T>): IQueryOption<T> {
   return { entity: false, write: false, component: Component };
 }
 
 /**
  * Query a component as read/write.
  */
-export function Write<T>(Component: ComponentConstructor<T>): QueryOption<T> {
+export function Write<T>(Component: IComponentConstructor<T>): IQueryOption<T> {
   return { entity: false, write: true, component: Component };
 }
 
 export { FlagComponentStorage } from "./FlagComponentStorage";
 export { MapComponentStorage } from "./MapComponentStorage";
 export { SparseArrayComponentStorage } from "./SparseArrayComponentStorage";
-export { System, SystemContext } from "./System";
+export { System, ISystemContext } from "./System";

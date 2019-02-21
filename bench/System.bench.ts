@@ -1,39 +1,43 @@
-import { World, Query, Component, EventChannel, ComponentEvent, System, SystemContext, ISystem, SparseArrayComponentStorage } from "../src/index";
+// tslint:disable: no-console
 
-class TestComponent implements Component {
+import { ComponentEvent, IComponent, IEventChannel, IQuery, ISystem, ISystemContext, SparseArrayComponentStorage, System, World } from "../src/index";
+
+class TestComponent implements IComponent {
 
 }
 
-interface BenchSystemContext extends SystemContext {
-  entities: Query<[TestComponent]>
+interface IBenchSystemContext extends ISystemContext {
+  entities: IQuery<[TestComponent]>
 }
 
-class BenchSystem extends System<BenchSystemContext> {
-  setup() {
+class BenchSystem extends System<IBenchSystemContext> {
+  public setup() {
     return {
       entities: this.world.createQuery(TestComponent)
     };
   }
 
-  update() {
+  public update() {
+    // tslint:disable-next-line:no-empty
     for (const [component] of this.ctx.entities) {
 
     }
   }
 }
 
-interface EventChannelSystemContext extends SystemContext {
-  events: EventChannel<TestComponent>
+interface IEventChannelSystemContext extends ISystemContext {
+  events: IEventChannel<TestComponent>
 }
 
-class EventChannelSystem extends System<EventChannelSystemContext> {
-  setup() {
+class EventChannelSystem extends System<IEventChannelSystemContext> {
+  public setup() {
     return {
       events: this.world.createEventChannel(ComponentEvent.Added, TestComponent)
     };
   }
 
-  update() {
+  public update() {
+    // tslint:disable-next-line:no-empty
     for (const [entityId, component] of this.ctx.events) {
 
     }

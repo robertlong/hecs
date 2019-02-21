@@ -1,15 +1,15 @@
 import test, { ExecutionContext } from "ava";
-import { Component, ComponentStorage, MapComponentStorage, SparseArrayComponentStorage } from "../src";
+import { IComponent, IComponentStorage, MapComponentStorage, SparseArrayComponentStorage } from "../src";
 
 class TestComponent {
-  value: number;
+  public value: number;
 
   constructor(value: number) {
     this.value = value;
   }
 }
 
-function createComponentStorageTest(ComponentStorage: { new(): ComponentStorage<Component> }) {
+function createComponentStorageTest(ComponentStorage: new() => IComponentStorage<IComponent>) {
   return (t: ExecutionContext) => {
     const storage = new ComponentStorage();
   

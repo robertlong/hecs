@@ -1,16 +1,16 @@
-import { Component, ComponentStorage, TEntityId } from "./index";
+import { IComponent, IComponentStorage, TEntityId } from "./index";
 
 /**
  * A ComponentStorage that is good for storing components that are on almost all entities.
  */
-export class SparseArrayComponentStorage<T extends Component> implements ComponentStorage<T> {
+export class SparseArrayComponentStorage<T extends IComponent> implements IComponentStorage<T> {
   private components: T[] = [];
 
-  get(entityId: TEntityId): T {
+  public get(entityId: TEntityId): T {
     return this.components[entityId];
   }
 
-  set(entityId: TEntityId, component: T): T {
+  public set(entityId: TEntityId, component: T): T {
     const components = this.components;
     
     for (let i = components.length; i <= entityId; i++) {
@@ -20,7 +20,7 @@ export class SparseArrayComponentStorage<T extends Component> implements Compone
     return components[entityId] = component;
   }
 
-  remove(entityId: TEntityId): boolean {
+  public remove(entityId: TEntityId): boolean {
     const components = this.components;
     const component = components[entityId];
     components[entityId] = undefined;

@@ -1,15 +1,15 @@
 import test from "ava";
-import { World, Query, EventChannel, ComponentEvent, Write, MapComponentStorage, System, SystemContext } from "../src";
+import { ComponentEvent, IEventChannel, IQuery, ISystemContext, MapComponentStorage, System, World, Write } from "../src";
 
-interface TestContext extends SystemContext {
-  entities: Query<[TestComponent, ObserverComponent]>
-  added: EventChannel<TestComponent>
-  changed: EventChannel<TestComponent>
-  removed: EventChannel<TestComponent>
+interface ITestContext extends ISystemContext {
+  entities: IQuery<[TestComponent, ObserverComponent]>
+  added: IEventChannel<TestComponent>
+  changed: IEventChannel<TestComponent>
+  removed: IEventChannel<TestComponent>
 }
 
 class TestComponent {
-  value: number;
+  public value: number;
 
   constructor(value: number) {
     this.value = value;
@@ -17,10 +17,10 @@ class TestComponent {
 }
 
 class ObserverComponent {
-  frame: number;
-  addedThisFrame: number;
-  changedThisFrame: number;
-  removedThisFrame: number;
+  public frame: number;
+  public addedThisFrame: number;
+  public changedThisFrame: number;
+  public removedThisFrame: number;
 
   constructor() {
     this.frame = 0;
@@ -30,27 +30,27 @@ class ObserverComponent {
   }
 }
 
-class TestSmartSystem extends System<TestContext> {
-  setup() {
+class TestSmartSystem extends System<ITestContext> {
+  public setup() {
     return {
-      entities: this.world.createQuery(Write(TestComponent), Write(ObserverComponent)),
       added: this.world.createEventChannel(ComponentEvent.Added, TestComponent),
       changed: this.world.createEventChannel(ComponentEvent.Changed, TestComponent),
+      entities: this.world.createQuery(Write(TestComponent), Write(ObserverComponent)),
       removed: this.world.createEventChannel(ComponentEvent.Removed, TestComponent)
     };
   }
 
-  update() {
+  public update() {
     for (const [testComponent, observerComponent] of this.ctx.entities) {
       testComponent.value++;
       observerComponent.frame++;
     }
-  
+
     for (const [entityId, testComponent] of this.ctx.added) {
       const observerComponent = this.world.getMutableComponent(entityId, ObserverComponent);
       observerComponent.addedThisFrame = observerComponent.frame;
-    }   
-  
+    }
+
     for (const [entityId, testComponent] of this.ctx.changed) {
       const observerComponent = this.world.getMutableComponent(entityId, ObserverComponent);
       observerComponent.changedThisFrame = observerComponent.frame;
