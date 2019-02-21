@@ -1,9 +1,14 @@
 {
   "name": "hecs",
   "version": "0.1.0",
-  "description": "",
-  "author": "",
-  "license": "ISC",
+  "description": "A fast ECS written in Javascript.",
+  "author": "Robert Long",
+  "license": "MIT",
+  "homepage": "https://robertlong.github.io/hecs/",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/robertlong/hecs"
+  },
   "main": "dist/index.js",
   "module": "dist-esm/index.js",
   "files": [
