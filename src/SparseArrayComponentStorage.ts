@@ -1,5 +1,8 @@
 import { Component, ComponentStorage, TEntityId } from "./index";
 
+/**
+ * A ComponentStorage that is good for storing components that are on almost all entities.
+ */
 export class SparseArrayComponentStorage<T extends Component> implements ComponentStorage<T> {
   private components: T[] = [];
 

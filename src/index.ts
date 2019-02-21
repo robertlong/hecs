@@ -57,6 +57,9 @@ export class World {
     this.systems = [];
   }
 
+  /**
+   * Create an entity in the world.
+   */
   createEntity() {
     let entityId: TEntityId;
 
@@ -79,6 +82,9 @@ export class World {
     return entityId;
   }
 
+  /**
+   * Destroy an entity.
+   */
   destroyEntity(entityId: TEntityId) {
     const entityFlags = this.entityFlags;
     const entityMaskLength = this.entityMaskLength;
@@ -95,10 +101,16 @@ export class World {
     this.entityPool.push(entityId);
   }
 
+  /**
+   * Returns true if an entity has been created and has not been destroyed.
+   */
   isAlive(entityId: TEntityId) {
     return (this.entityFlags[entityId * this.entityMaskLength] & 1) === 1;
   }
 
+  /**
+   * Register a component class and storage with the world so that it can be queried.
+   */
   registerComponent<T extends Component>(Component: ComponentConstructor<T>, storage?: ComponentStorage<T>) {
     storage = storage || new MapComponentStorage();
     
@@ -136,12 +148,21 @@ export class World {
     }
   }
 
+  /**
+   * Returns true if an entity has the provided component.
+   */
   hasComponent(entityId: TEntityId, Component: ComponentConstructor<Component>) {
     const maskIndex = (entityId * this.entityMaskLength) + Component.maskIndex;
     const componentMask =  Component.mask;
     return (this.entityFlags[maskIndex] & componentMask) === componentMask;
   }
 
+  /**
+   * Get an immutable reference to the component on the provided entity.
+   * 
+   * @remarks In development mode, in order to throw an error when an immutable component is mutated,
+   * this method returns a proxy of the component, not the original component.
+   */
   getImmutableComponent<T extends Component>(entityId: TEntityId, Component: ComponentConstructor<T>): T {
     let component = this.componentStorages[Component.id].get(entityId) as T;
 
@@ -152,12 +173,22 @@ export class World {
     return component;
   }
 
+  /**
+   * Get a mutable reference to the component on the provided entity.
+   * 
+   * @remarks A ComponentEvent.Changed event is pushed to any EventChannels for this component.
+   */
   getMutableComponent<T extends Component>(entityId: TEntityId, Component: ComponentConstructor<T>): T {
     const componentId = Component.id;
     this.pushComponentEvent(componentId, entityId, ComponentEvent.Changed);
     return this.componentStorages[componentId].get(entityId) as T;
   }
 
+  /**
+   * Add the component to the provided entity. Returns null if the entity already has the component.
+   * 
+   * @remarks A ComponentEvent.Added event is pushed to any EventChannels for this component.
+   */
   addComponent<T extends Component>(entityId: TEntityId, component: T): T {
     const Component = component.constructor as ComponentConstructor<T>;
     const componentId = Component.id;
@@ -173,6 +204,11 @@ export class World {
     return null;
   }
 
+  /**
+   * Remove the component from the provided entity. Returns null if the entity doesn't have the component.
+   * 
+   * @remarks A ComponentEvent.Removed event is pushed to any EventChannels for this component.
+   */
   removeComponent(entityId: TEntityId, Component: ComponentConstructor<Component>) {
     const componentId = Component.id;
     
@@ -200,6 +236,11 @@ export class World {
     }
   }
 
+  /**
+   * Create a query for the provided QueryParameters.
+   * 
+   * @remarks See EntityId, Read, and Write for details on the different QueryParameters.
+   */
   createQuery<A>(a: QueryParameter<A>): Query<[A]>
   createQuery<A, B>(a: QueryParameter<A>, b: QueryParameter<B>): Query<[A, B]>
   createQuery<A, B, C>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>): Query<[A, B, C]>
@@ -299,6 +340,9 @@ export class World {
     }
   }
 
+  /**
+   * Create an event channel for the provided ComponentEvent and Component.
+   */
   createEventChannel<T extends Component>(event: ComponentEvent, Component?: ComponentConstructor<T>): EventChannel<T> {
     const eventQueues = this.componentEventQueues[Component.id][event];
     const eventQueue: TEntityId[] = [];
@@ -339,23 +383,37 @@ export class World {
     }
   }
 
+  /**
+   * Register a system with the world. The system's init method will be called.
+   * 
+   * @remarks Systems are updated in the order they are registered.
+   */
   registerSystem(system: ISystem) {
     this.systems.push(system);
     system.init(this);
   }
 
+  /**
+   * Update all systems registered with the world.
+   */
   update() {
     for (let i = 0; i < this.systems.length; i++) {
       this.systems[i].update();
     }
   }
 
+  /**
+   * Unregister the system. The system's destroy method will be called.
+   */
   unregisterSystem(system: ISystem) {
     const index = this.systems.indexOf(system);
     this.systems[index].destroy();
     this.systems.splice(index, 1);
   }
 
+  /**
+   * Destroy the world and all registered systems.
+   */
   destroy() {
     for (const system of this.systems) {
       system.destroy();
@@ -414,12 +472,21 @@ export interface QueryOption<T> {
   component: ComponentConstructor<T> | null
 }
 
+/**
+ * Query an entity id.
+ */
 export const EntityId: QueryOption<TEntityId> = { entity: true, write: false, component: null };
 
+/**
+ * Query a component as read only.
+ */
 export function Read<T>(Component: ComponentConstructor<T>): QueryOption<T> {
   return { entity: false, write: false, component: Component };
 }
 
+/**
+ * Query a component as read/write.
+ */
 export function Write<T>(Component: ComponentConstructor<T>): QueryOption<T> {
   return { entity: false, write: true, component: Component };
 }

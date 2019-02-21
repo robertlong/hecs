@@ -1,0 +1,6 @@
+{
+  "mode": "modules",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "out": "docs"
+}

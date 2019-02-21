@@ -6,6 +6,13 @@
   "license": "ISC",
   "main": "dist/index.js",
   "module": "dist-esm/index.js",
+  "files": [
+    "package.json",
+    "LICENSE",
+    "README.md",
+    "dist/",
+    "dist-esm/"
+  ],
   "scripts": {
     "example": "cross-env TS_NODE_PROJECT=./tsconfig.example.json NODE_ENV=development webpack-dev-server --config ./webpack.example.config.js",
     "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json NODE_ENV=development ava",
@@ -14,9 +21,10 @@
     "bench": "npm run bench:node",
     "bench:node": "cross-env TS_NODE_PROJECT=./tsconfig.bench.json NODE_ENV=production ts-node ./bench/index.ts",
     "bench:browser": "cross-env TS_NODE_PROJECT=./tsconfig.bench.json NODE_ENV=production webpack-dev-server --config ./webpack.bench.config.js",
-    "build": "npm run build:commonjs && npm run build:esm",
+    "build": "npm run build:commonjs && npm run build:esm && npm run build:docs",
     "build:commonjs": "tsc -p ./tsconfig.dist.json",
-    "build:esm": "tsc -p ./tsconfig.dist-esm.json"
+    "build:esm": "tsc -p ./tsconfig.dist-esm.json",
+    "build:docs": "typedoc --tsconfig ./tsconfig.dist-esm.json"
   },
   "ava": {
     "compileEnhancements": false,
@@ -56,9 +64,9 @@
     "cross-env": "^5.2.0",
     "html-webpack-plugin": "^3.2.0",
     "nyc": "^13.3.0",
-    "three": "git+https://github.com/mrdoob/three.js.git",
     "ts-loader": "^5.3.3",
     "ts-node": "^8.0.2",
+    "typedoc": "^0.14.2",
     "typescript": "^3.3.1",
     "webpack": "^4.29.0",
     "webpack-cli": "^3.2.1",
