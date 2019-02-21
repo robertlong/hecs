@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>QueryOption | hecs</title>
+	<title>IComponentConstructor | hecs</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/_index_.html">&quot;index&quot;</a>
 				</li>
 				<li>
-					<a href="_index_.queryoption.html">QueryOption</a>
+					<a href="_index_.icomponentconstructor.html">IComponentConstructor</a>
 				</li>
 			</ul>
-			<h1>Interface QueryOption&lt;T&gt;</h1>
+			<h1>Interface IComponentConstructor&lt;T&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 				<h3>Type parameters</h3>
 				<ul class="tsd-type-parameters">
 					<li>
-						<h4>T</h4>
+						<h4>T<span class="tsd-signature-symbol">: </span><a href="_index_.icomponent.html" class="tsd-signature-type">IComponent</a></h4>
 					</li>
 				</ul>
 			</section>
@@ -81,7 +81,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">QueryOption</span>
+						<span class="target">IComponentConstructor</span>
 					</li>
 				</ul>
 			</section>
@@ -90,45 +90,77 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-interface"><a href="_index_.icomponentconstructor.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_index_.queryoption.html#component" class="tsd-kind-icon">component</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_index_.queryoption.html#entity" class="tsd-kind-icon">entity</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_index_.queryoption.html#write" class="tsd-kind-icon">write</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_index_.icomponentconstructor.html#id" class="tsd-kind-icon">id</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_index_.icomponentconstructor.html#mask" class="tsd-kind-icon">mask</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_index_.icomponentconstructor.html#maskindex" class="tsd-kind-icon">mask<wbr>Index</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-interface">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">new IComponent<wbr>Constructor<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">...</span>args<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/1965075/src/index.ts#L441">index.ts:441</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5><span class="tsd-flag ts-flagRest">Rest</span> <span class="tsd-signature-symbol">...</span>args: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">[]</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
+						</li>
+					</ul>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="component" class="tsd-anchor"></a>
-					<h3>component</h3>
-					<div class="tsd-signature tsd-kind-icon">component<span class="tsd-signature-symbol">:</span> <a href="_index_.componentconstructor.html" class="tsd-signature-type">ComponentConstructor</a><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">null</span></div>
+					<a name="id" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> id</h3>
+					<div class="tsd-signature tsd-kind-icon">id<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/robertlong/hecs/blob/0ba6631/src/index.ts#L472">index.ts:472</a></li>
+							<li>Defined in <a href="https://github.com/robertlong/hecs/blob/1965075/src/index.ts#L439">index.ts:439</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="entity" class="tsd-anchor"></a>
-					<h3>entity</h3>
-					<div class="tsd-signature tsd-kind-icon">entity<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<a name="mask" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> mask</h3>
+					<div class="tsd-signature tsd-kind-icon">mask<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/robertlong/hecs/blob/0ba6631/src/index.ts#L470">index.ts:470</a></li>
+							<li>Defined in <a href="https://github.com/robertlong/hecs/blob/1965075/src/index.ts#L441">index.ts:441</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="write" class="tsd-anchor"></a>
-					<h3>write</h3>
-					<div class="tsd-signature tsd-kind-icon">write<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<a name="maskindex" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> mask<wbr>Index</h3>
+					<div class="tsd-signature tsd-kind-icon">mask<wbr>Index<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/robertlong/hecs/blob/0ba6631/src/index.ts#L471">index.ts:471</a></li>
+							<li>Defined in <a href="https://github.com/robertlong/hecs/blob/1965075/src/index.ts#L440">index.ts:440</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -172,46 +204,49 @@
 						<a href="../classes/_index_.world.html" class="tsd-kind-icon">World</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_index_.component.html" class="tsd-kind-icon">Component</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.componentconstructor.html" class="tsd-kind-icon">Component<wbr>Constructor</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.componentstorage.html" class="tsd-kind-icon">Component<wbr>Storage</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.eventchannel.html" class="tsd-kind-icon">Event<wbr>Channel</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_index_.isystem.html" class="tsd-kind-icon">ISystem</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.query.html" class="tsd-kind-icon">Query</a>
+						<a href="_index_.icomponent.html" class="tsd-kind-icon">IComponent</a>
 					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.queryoption.html" class="tsd-kind-icon">Query<wbr>Option</a>
+						<a href="_index_.icomponentconstructor.html" class="tsd-kind-icon">IComponent<wbr>Constructor</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_index_.queryoption.html#component" class="tsd-kind-icon">component</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-interface">
+								<a href="_index_.icomponentconstructor.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_index_.queryoption.html#entity" class="tsd-kind-icon">entity</a>
+								<a href="_index_.icomponentconstructor.html#id" class="tsd-kind-icon">id</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_index_.queryoption.html#write" class="tsd-kind-icon">write</a>
+								<a href="_index_.icomponentconstructor.html#mask" class="tsd-kind-icon">mask</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_index_.icomponentconstructor.html#maskindex" class="tsd-kind-icon">mask<wbr>Index</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="../modules/_index_.html#queryparameter" class="tsd-kind-icon">Query<wbr>Parameter</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_index_.icomponentstorage.html" class="tsd-kind-icon">IComponent<wbr>Storage</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_index_.ieventchannel.html" class="tsd-kind-icon">IEvent<wbr>Channel</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_index_.iquery.html" class="tsd-kind-icon">IQuery</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_index_.iqueryoption.html" class="tsd-kind-icon">IQuery<wbr>Option</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_index_.isystem.html" class="tsd-kind-icon">ISystem</a>
 					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 						<a href="../modules/_index_.html#tentityid" class="tsd-kind-icon">TEntity<wbr>Id</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../modules/_index_.html#tqueryparameter" class="tsd-kind-icon">TQuery<wbr>Parameter</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="../modules/_index_.html#wrapimmutablecomponent" class="tsd-kind-icon">wrap<wbr>Immutable<wbr>Component</a>

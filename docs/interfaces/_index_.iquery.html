@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>EventChannel | hecs</title>
+	<title>IQuery | hecs</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -59,10 +59,10 @@
 					<a href="../modules/_index_.html">&quot;index&quot;</a>
 				</li>
 				<li>
-					<a href="_index_.eventchannel.html">EventChannel</a>
+					<a href="_index_.iquery.html">IQuery</a>
 				</li>
 			</ul>
-			<h1>Interface EventChannel&lt;T&gt;</h1>
+			<h1>Interface IQuery&lt;T&gt;</h1>
 		</div>
 	</div>
 </header>
@@ -73,7 +73,7 @@
 				<h3>Type parameters</h3>
 				<ul class="tsd-type-parameters">
 					<li>
-						<h4>T<span class="tsd-signature-symbol">: </span><a href="_index_.component.html" class="tsd-signature-type">Component</a></h4>
+						<h4>T<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../modules/_index_.html#tentityid" class="tsd-signature-type">TEntityId</a><span class="tsd-signature-symbol"> | </span><a href="_index_.icomponent.html" class="tsd-signature-type">IComponent</a><span class="tsd-signature-symbol">&gt;</span></h4>
 					</li>
 				</ul>
 			</section>
@@ -81,7 +81,7 @@
 				<h3>Hierarchy</h3>
 				<ul class="tsd-hierarchy">
 					<li>
-						<span class="target">EventChannel</span>
+						<span class="target">IQuery</span>
 					</li>
 				</ul>
 			</section>
@@ -92,10 +92,10 @@
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.eventchannel.html#___iterator" class="tsd-kind-icon">__@iterator</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.eventchannel.html#destroy" class="tsd-kind-icon">destroy</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.eventchannel.html#first" class="tsd-kind-icon">first</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.eventchannel.html#isempty" class="tsd-kind-icon">is<wbr>Empty</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.iquery.html#___iterator" class="tsd-kind-icon">__@iterator</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.iquery.html#destroy" class="tsd-kind-icon">destroy</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.iquery.html#first" class="tsd-kind-icon">first</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_index_.iquery.html#isempty" class="tsd-kind-icon">is<wbr>Empty</a></li>
 							</ul>
 						</section>
 					</div>
@@ -107,16 +107,16 @@
 					<a name="___iterator" class="tsd-anchor"></a>
 					<h3>__@iterator</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">__@iterator<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Iterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><a href="../modules/_index_.html#tentityid" class="tsd-signature-type">TEntityId</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">__@iterator<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Iterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/0ba6631/src/index.ts#L432">index.ts:432</a></li>
+									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/1965075/src/index.ts#L417">index.ts:417</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-symbol">[</span><a href="../modules/_index_.html#tentityid" class="tsd-signature-type">TEntityId</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Iterator</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -130,7 +130,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/0ba6631/src/index.ts#L435">index.ts:435</a></li>
+									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/1965075/src/index.ts#L420">index.ts:420</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -141,16 +141,16 @@
 					<a name="first" class="tsd-anchor"></a>
 					<h3>first</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">first<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-symbol">[</span><a href="../modules/_index_.html#tentityid" class="tsd-signature-type">TEntityId</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span></li>
+						<li class="tsd-signature tsd-kind-icon">first<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">T</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/0ba6631/src/index.ts#L433">index.ts:433</a></li>
+									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/1965075/src/index.ts#L418">index.ts:418</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-symbol">[</span><a href="../modules/_index_.html#tentityid" class="tsd-signature-type">TEntityId</a><span class="tsd-signature-symbol">, </span><span class="tsd-signature-type">T</span><span class="tsd-signature-symbol">]</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">T</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -164,7 +164,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/0ba6631/src/index.ts#L434">index.ts:434</a></li>
+									<li>Defined in <a href="https://github.com/robertlong/hecs/blob/1965075/src/index.ts#L419">index.ts:419</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -211,49 +211,49 @@
 						<a href="../classes/_index_.world.html" class="tsd-kind-icon">World</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_index_.component.html" class="tsd-kind-icon">Component</a>
+						<a href="_index_.icomponent.html" class="tsd-kind-icon">IComponent</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.componentconstructor.html" class="tsd-kind-icon">Component<wbr>Constructor</a>
+						<a href="_index_.icomponentconstructor.html" class="tsd-kind-icon">IComponent<wbr>Constructor</a>
 					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.componentstorage.html" class="tsd-kind-icon">Component<wbr>Storage</a>
+						<a href="_index_.icomponentstorage.html" class="tsd-kind-icon">IComponent<wbr>Storage</a>
+					</li>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_index_.ieventchannel.html" class="tsd-kind-icon">IEvent<wbr>Channel</a>
 					</li>
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.eventchannel.html" class="tsd-kind-icon">Event<wbr>Channel</a>
+						<a href="_index_.iquery.html" class="tsd-kind-icon">IQuery</a>
 						<ul>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
-								<a href="_index_.eventchannel.html#___iterator" class="tsd-kind-icon">__@iterator</a>
+								<a href="_index_.iquery.html#___iterator" class="tsd-kind-icon">__@iterator</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
-								<a href="_index_.eventchannel.html#destroy" class="tsd-kind-icon">destroy</a>
+								<a href="_index_.iquery.html#destroy" class="tsd-kind-icon">destroy</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
-								<a href="_index_.eventchannel.html#first" class="tsd-kind-icon">first</a>
+								<a href="_index_.iquery.html#first" class="tsd-kind-icon">first</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
-								<a href="_index_.eventchannel.html#isempty" class="tsd-kind-icon">is<wbr>Empty</a>
+								<a href="_index_.iquery.html#isempty" class="tsd-kind-icon">is<wbr>Empty</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="_index_.iqueryoption.html" class="tsd-kind-icon">IQuery<wbr>Option</a>
+					</li>
 					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
 						<a href="_index_.isystem.html" class="tsd-kind-icon">ISystem</a>
 					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.query.html" class="tsd-kind-icon">Query</a>
-					</li>
-					<li class=" tsd-kind-interface tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="_index_.queryoption.html" class="tsd-kind-icon">Query<wbr>Option</a>
-					</li>
-					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
-						<a href="../modules/_index_.html#queryparameter" class="tsd-kind-icon">Query<wbr>Parameter</a>
-					</li>
 					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module">
 						<a href="../modules/_index_.html#tentityid" class="tsd-kind-icon">TEntity<wbr>Id</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-has-type-parameter">
+						<a href="../modules/_index_.html#tqueryparameter" class="tsd-kind-icon">TQuery<wbr>Parameter</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="../modules/_index_.html#wrapimmutablecomponent" class="tsd-kind-icon">wrap<wbr>Immutable<wbr>Component</a>
