@@ -1,15 +1,15 @@
-import { Component, ComponentStorage, EntityId } from "./index";
+import { Component, ComponentStorage, TEntityId } from "./index";
 
 export class FlagComponentStorage<T extends Component> implements ComponentStorage<T> {
-  get(entityId: EntityId) {
+  get(entityId: TEntityId): T {
     return undefined;
   }
 
-  set(entityId: EntityId, component: T) {
+  set(entityId: TEntityId, component: T): T {
     return undefined;
   }
 
-  remove(entityId: EntityId) {
+  remove(entityId: TEntityId) {
     return true;
   }
 }

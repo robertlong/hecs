@@ -4,15 +4,19 @@
   "description": "",
   "author": "",
   "license": "ISC",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist-esm/index.js",
   "scripts": {
-    "example": "cross-env NODE_ENV=development webpack-dev-server --config ./webpack.example.config.js",
-    "test": "cross-env NODE_ENV=development ava",
-    "test:watch": "cross-env NODE_ENV=development ava --watch",
-    "coverage": "cross-env NODE_ENV=development nyc ava",
-    "bench": "npm run bench:browser",
-    "bench:node": "cross-env NODE_ENV=production ts-node ./bench/index.ts",
-    "bench:browser": "cross-env NODE_ENV=production webpack-dev-server --config ./webpack.bench.config.js"
+    "example": "cross-env TS_NODE_PROJECT=./tsconfig.example.json NODE_ENV=development webpack-dev-server --config ./webpack.example.config.js",
+    "test": "cross-env TS_NODE_PROJECT=./tsconfig.test.json NODE_ENV=development ava",
+    "test:watch": "cross-env TS_NODE_PROJECT=./tsconfig.test.json NODE_ENV=development ava --watch",
+    "coverage": "cross-env TS_NODE_PROJECT=./tsconfig.test.json NODE_ENV=development nyc ava",
+    "bench": "npm run bench:node",
+    "bench:node": "cross-env TS_NODE_PROJECT=./tsconfig.bench.json NODE_ENV=production ts-node ./bench/index.ts",
+    "bench:browser": "cross-env TS_NODE_PROJECT=./tsconfig.bench.json NODE_ENV=production webpack-dev-server --config ./webpack.bench.config.js",
+    "build": "npm run build:commonjs && npm run build:esm",
+    "build:commonjs": "tsc -p ./tsconfig.dist.json",
+    "build:esm": "tsc -p ./tsconfig.dist-esm.json"
   },
   "ava": {
     "compileEnhancements": false,
@@ -45,16 +49,14 @@
     ],
     "all": true
   },
-  "dependencies": {
-    "@types/node": "^10.12.24",
-    "bitset": "^5.0.5",
-    "three": "git+https://github.com/mrdoob/three.js.git"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "@types/node": "^10.12.26",
     "ava": "^1.2.0",
     "cross-env": "^5.2.0",
     "html-webpack-plugin": "^3.2.0",
     "nyc": "^13.3.0",
+    "three": "git+https://github.com/mrdoob/three.js.git",
     "ts-loader": "^5.3.3",
     "ts-node": "^8.0.2",
     "typescript": "^3.3.1",

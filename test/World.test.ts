@@ -1,6 +1,5 @@
 import test from "ava";
-import { World, ComponentEvent, Component, ComponentConstructor, Entity } from "../src";
-import { MapComponentStorage } from "../src/MapComponentStorage";
+import { World, ComponentEvent, Component, ComponentConstructor, MapComponentStorage } from "../src";
 
 class TestComponent {
   value: number
@@ -48,7 +47,7 @@ test("World#registerComponent()", t => {
   t.is(world.getEntityFlags().length, 1024);
   t.is(world.getEntityMaskLength(), 1);
 
-  let Component;
+  let Component: ComponentConstructor<Component>;
 
   for (let i = 0; i < 32; i++) {
     Component = class implements Component {};

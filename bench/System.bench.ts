@@ -1,6 +1,4 @@
-import { World, Query, Component, EventChannel, ComponentEvent, System } from "../src/index";
-import { SparseArrayComponentStorage } from "../src/SparseArrayComponentStorage";
-import { SmartSystem, SystemContext } from "../src/SmartSystem";
+import { World, Query, Component, EventChannel, ComponentEvent, System, SystemContext, ISystem, SparseArrayComponentStorage } from "../src/index";
 
 class TestComponent implements Component {
 
@@ -10,7 +8,7 @@ interface BenchSystemContext extends SystemContext {
   entities: Query<[TestComponent]>
 }
 
-class BenchSystem extends SmartSystem<BenchSystemContext> {
+class BenchSystem extends System<BenchSystemContext> {
   setup() {
     return {
       entities: this.world.createQuery(TestComponent)
@@ -28,7 +26,7 @@ interface EventChannelSystemContext extends SystemContext {
   events: EventChannel<TestComponent>
 }
 
-class EventChannelSystem extends SmartSystem<EventChannelSystemContext> {
+class EventChannelSystem extends System<EventChannelSystemContext> {
   setup() {
     return {
       events: this.world.createEventChannel(ComponentEvent.Added, TestComponent)
@@ -46,7 +44,7 @@ function waitFor(time: number) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-async function benchmarkSystem(system: System, numEntities = 1000, numUpdates = 1, numSystems = 1) {
+async function benchmarkSystem(system: ISystem, numEntities = 1000, numUpdates = 1, numSystems = 1) {
   const world = new World();
   world.registerComponent(TestComponent, new SparseArrayComponentStorage());
 

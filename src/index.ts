@@ -1,8 +1,3 @@
-// https://github.com/makrjs/makr/issues/3 // Fast queries with iterators
-// https://github.com/slide-rs/hibitset/blob/master/src/lib.rs // bitmasks for lots of components
-// https://github.com/slide-rs/specs/blob/master/src/storage/flagged.rs // component events
-// https://github.com/rustgd/shrev-rs // ring buffer event channel
-
 /**
  * Bitset for each entity can be stored in a single typed array / array buffer
  * for the best data locality when iterating through entities. Data for each entity
@@ -22,20 +17,22 @@
  * 
  **/
 
-let wrapImmutableComponent;
+import { MapComponentStorage } from "./MapComponentStorage";
+
+let wrapImmutableComponent: <T extends Component>(component: T) => T;
 if (process.env.NODE_ENV === "development") {
-  wrapImmutableComponent = function(component: Component) {
-    return new Proxy(component, {
-      set(component, prop) {
+  wrapImmutableComponent = function<T>(component: T): T {
+    return new Proxy(component as unknown as object, {
+      set(component: Component, prop: string) {
         throw new Error(`Tried to write to "${component.constructor.name}#${String(prop)}" on immutable component. Use Write() or .getMutableComponent() to write to a component.`);
       }
-    });
+    }) as T;
   }
 }
 
 export class World {
-  protected entityPool: EntityId[];
-  protected entityCount: EntityId;
+  protected entityPool: TEntityId[];
+  protected entityCount: TEntityId;
   protected entityFlags: Uint32Array;
   protected entityMaskLength: number;
   protected componentConstructors: ComponentConstructor<Component>[];
@@ -47,7 +44,7 @@ export class World {
       [ComponentEvent.Changed]: number[][]
     }
   }
-  protected systems: System[];
+  protected systems: ISystem[];
 
   constructor() {
     this.entityPool = [];
@@ -61,7 +58,7 @@ export class World {
   }
 
   createEntity() {
-    let entityId: EntityId;
+    let entityId: TEntityId;
 
     if (this.entityPool.length > 0) {
       entityId = this.entityPool.pop();
@@ -82,7 +79,7 @@ export class World {
     return entityId;
   }
 
-  destroyEntity(entityId: EntityId) {
+  destroyEntity(entityId: TEntityId) {
     const entityFlags = this.entityFlags;
     const entityMaskLength = this.entityMaskLength;
 
@@ -98,11 +95,13 @@ export class World {
     this.entityPool.push(entityId);
   }
 
-  isAlive(entityId: EntityId) {
+  isAlive(entityId: TEntityId) {
     return (this.entityFlags[entityId * this.entityMaskLength] & 1) === 1;
   }
 
-  registerComponent<T extends Component>(Component: ComponentConstructor<T>, storage: ComponentStorage<T>) {
+  registerComponent<T extends Component>(Component: ComponentConstructor<T>, storage?: ComponentStorage<T>) {
+    storage = storage || new MapComponentStorage();
+    
     const numComponents = this.componentStorages.length;
     const maskSize = numComponents + 1;
     const id = Component.id = numComponents;
@@ -137,29 +136,29 @@ export class World {
     }
   }
 
-  hasComponent(entityId: EntityId, Component: ComponentConstructor<Component>) {
+  hasComponent(entityId: TEntityId, Component: ComponentConstructor<Component>) {
     const maskIndex = (entityId * this.entityMaskLength) + Component.maskIndex;
     const componentMask =  Component.mask;
     return (this.entityFlags[maskIndex] & componentMask) === componentMask;
   }
 
-  getImmutableComponent<T extends Component>(entityId: EntityId, Component: ComponentConstructor<T>): T {
+  getImmutableComponent<T extends Component>(entityId: TEntityId, Component: ComponentConstructor<T>): T {
     let component = this.componentStorages[Component.id].get(entityId) as T;
 
     if (process.env.NODE_ENV === "development") {
-      component = wrapImmutableComponent(component);
+      component = wrapImmutableComponent<T>(component);
     }
 
     return component;
   }
 
-  getMutableComponent<T extends Component>(entityId: EntityId, Component: ComponentConstructor<T>): T {
+  getMutableComponent<T extends Component>(entityId: TEntityId, Component: ComponentConstructor<T>): T {
     const componentId = Component.id;
     this.pushComponentEvent(componentId, entityId, ComponentEvent.Changed);
     return this.componentStorages[componentId].get(entityId) as T;
   }
 
-  addComponent<T extends Component>(entityId: EntityId, component: T): T {
+  addComponent<T extends Component>(entityId: TEntityId, component: T): T {
     const Component = component.constructor as ComponentConstructor<T>;
     const componentId = Component.id;
 
@@ -174,7 +173,7 @@ export class World {
     return null;
   }
 
-  removeComponent(entityId: EntityId, Component: ComponentConstructor<Component>) {
+  removeComponent(entityId: TEntityId, Component: ComponentConstructor<Component>) {
     const componentId = Component.id;
     
     if (this.componentStorages[componentId].remove(entityId)) {
@@ -207,11 +206,11 @@ export class World {
   createQuery<A, B, C, D>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>): Query<[A, B, C, D]>
   createQuery<A, B, C, D, E>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>, e: QueryParameter<E>): Query<[A, B, C, D, E]>
   createQuery<A, B, C, D, E, F>(a: QueryParameter<A>, b: QueryParameter<B>, c: QueryParameter<C>, d: QueryParameter<C>, e: QueryParameter<E>, f: QueryParameter<F>): Query<[A, B, C, D, E, F]>
-  createQuery(...parameters: QueryParameter<EntityId | Component>[]): Query<(EntityId | Component)[]> {
+  createQuery(...parameters: QueryParameter<TEntityId | Component>[]): Query<(TEntityId | Component)[]> {
     const self = this;
     const queryMask = new Uint32Array(this.entityMaskLength);
-    const results = [];
-    const queryParameters = [];
+    const results: (TEntityId | Component)[] = [];
+    const queryParameters: (TEntityId | Component)[] = [];
     const componentStorages: ComponentStorage<Component>[] = [];
 
     // Only query for active entities.
@@ -257,7 +256,7 @@ export class World {
 
             if (match) {
               for (let p = 0; p < queryParameters.length; p++) {
-                const parameter = queryParameters[p] as QueryOption<Component | EntityId>;
+                const parameter = queryParameters[p] as QueryOption<Component | TEntityId>;
                 
                 if (parameter.entity) {
                   results[p] = i;
@@ -302,13 +301,13 @@ export class World {
 
   createEventChannel<T extends Component>(event: ComponentEvent, Component?: ComponentConstructor<T>): EventChannel<T> {
     const eventQueues = this.componentEventQueues[Component.id][event];
-    const eventQueue: EntityId[] = [];
+    const eventQueue: TEntityId[] = [];
     eventQueues.push(eventQueue);
-    const results = [undefined, undefined] as [EntityId, T];
+    const results = [undefined, undefined] as [TEntityId, T];
     const componentStorage = this.componentStorages[Component.id];
 
     function iterator() {
-      let id: EntityId;
+      let id: TEntityId;
       const result = { value: results, done: false };
 
       return {
@@ -340,7 +339,7 @@ export class World {
     }
   }
 
-  registerSystem(system: System) {
+  registerSystem(system: ISystem) {
     this.systems.push(system);
     system.init(this);
   }
@@ -351,7 +350,7 @@ export class World {
     }
   }
 
-  unregisterSystem(system: System) {
+  unregisterSystem(system: ISystem) {
     const index = this.systems.indexOf(system);
     this.systems[index].destroy();
     this.systems.splice(index, 1);
@@ -364,7 +363,7 @@ export class World {
   }
 }
 
-export interface Query<T extends (EntityId | Component)[]> {
+export interface Query<T extends (TEntityId | Component)[]> {
   [Symbol.iterator](): Iterator<T>
   first(): T
   isEmpty(): boolean
@@ -372,8 +371,8 @@ export interface Query<T extends (EntityId | Component)[]> {
 }
 
 export interface EventChannel<T extends Component> {
-  [Symbol.iterator](): Iterator<[EntityId, T]>
-  first(): [EntityId, T]
+  [Symbol.iterator](): Iterator<[TEntityId, T]>
+  first(): [TEntityId, T]
   isEmpty(): boolean
   destroy(): void
 }
@@ -384,7 +383,7 @@ export enum ComponentEvent {
   Changed
 }
 
-export type EntityId = number;
+export type TEntityId = number;
 
 export interface ComponentConstructor<T extends Component> {
   id?: number
@@ -396,13 +395,13 @@ export interface ComponentConstructor<T extends Component> {
 export interface Component {}
 
 export interface ComponentStorage<T extends Component> {
-  get(entityId: EntityId): T | undefined
-  set(entityId: EntityId, component: T): T
-  remove(entityId: EntityId): boolean
+  get(entityId: TEntityId): T | undefined
+  set(entityId: TEntityId, component: T): T
+  remove(entityId: TEntityId): boolean
 }
 
-export interface System {
-  init(world: World);
+export interface ISystem {
+  init(world: World): void;
   update(): void;
   destroy(): void;
 }
@@ -415,9 +414,7 @@ export interface QueryOption<T> {
   component: ComponentConstructor<T> | null
 }
 
-export function Entity(): QueryOption<EntityId> {
-  return { entity: true, write: false, component: null };
-}
+export const EntityId: QueryOption<TEntityId> = { entity: true, write: false, component: null };
 
 export function Read<T>(Component: ComponentConstructor<T>): QueryOption<T> {
   return { entity: false, write: false, component: Component };
@@ -426,3 +423,8 @@ export function Read<T>(Component: ComponentConstructor<T>): QueryOption<T> {
 export function Write<T>(Component: ComponentConstructor<T>): QueryOption<T> {
   return { entity: false, write: true, component: Component };
 }
+
+export { FlagComponentStorage } from "./FlagComponentStorage";
+export { MapComponentStorage } from "./MapComponentStorage";
+export { SparseArrayComponentStorage } from "./SparseArrayComponentStorage";
+export { System, SystemContext } from "./System";

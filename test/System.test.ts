@@ -1,7 +1,5 @@
 import test from "ava";
-import { SmartSystem, SystemContext } from "../src/SmartSystem";
-import { MapComponentStorage } from "../src/MapComponentStorage"
-import { World, Query, EventChannel, ComponentEvent, Write } from "../src";
+import { World, Query, EventChannel, ComponentEvent, Write, MapComponentStorage, System, SystemContext } from "../src";
 
 interface TestContext extends SystemContext {
   entities: Query<[TestComponent, ObserverComponent]>
@@ -32,7 +30,7 @@ class ObserverComponent {
   }
 }
 
-class TestSmartSystem extends SmartSystem<TestContext> {
+class TestSmartSystem extends System<TestContext> {
   setup() {
     return {
       entities: this.world.createQuery(Write(TestComponent), Write(ObserverComponent)),

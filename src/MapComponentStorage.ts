@@ -1,18 +1,18 @@
-import { Component, ComponentStorage, EntityId } from "./index";
+import { Component, ComponentStorage, TEntityId } from "./index";
 
 export class MapComponentStorage<T extends Component> implements ComponentStorage<T> {
-  private components: Map<EntityId, T> = new Map();
+  private components: Map<TEntityId, T> = new Map();
 
-  get(entityId: EntityId) {
+  get(entityId: TEntityId) {
     return this.components.get(entityId);
   }
 
-  set(entityId: EntityId, component: T) {
+  set(entityId: TEntityId, component: T) {
     this.components.set(entityId, component);
     return component;
   }
 
-  remove(entityId: EntityId) {
+  remove(entityId: TEntityId) {
     return this.components.delete(entityId);
   }
 }

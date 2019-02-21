@@ -1,8 +1,8 @@
-import { EventChannel, Query, System, World, ComponentConstructor, Component } from "./index";
+import { EventChannel, Query, ISystem, World, Component } from "./index";
 
 export type SystemContext = { [name: string]: EventChannel<Component> | Query<Component[]> };
 
-export abstract class SmartSystem<T extends SystemContext> implements System {
+export abstract class System<T extends SystemContext> implements ISystem {
   world: World
   ctx: T
 

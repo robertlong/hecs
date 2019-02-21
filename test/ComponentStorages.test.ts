@@ -1,6 +1,5 @@
 import test, { ExecutionContext } from "ava";
-import { MapComponentStorage } from "../src/MapComponentStorage";
-import { SparseArrayComponentStorage } from "../src/SparseArrayComponentStorage";
+import { Component, ComponentStorage, MapComponentStorage, SparseArrayComponentStorage } from "../src";
 
 class TestComponent {
   value: number;
@@ -10,7 +9,7 @@ class TestComponent {
   }
 }
 
-function createComponentStorageTest(ComponentStorage) {
+function createComponentStorageTest(ComponentStorage: { new(): ComponentStorage<Component> }) {
   return (t: ExecutionContext) => {
     const storage = new ComponentStorage();
   

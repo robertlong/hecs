@@ -1,5 +1,4 @@
-import { MapComponentStorage } from "../src/MapComponentStorage";
-import { SparseArrayComponentStorage } from "../src/SparseArrayComponentStorage";
+import { MapComponentStorage, SparseArrayComponentStorage } from "../src";
 
 const mapStorage = new MapComponentStorage();
 const arrayStorage = new SparseArrayComponentStorage();

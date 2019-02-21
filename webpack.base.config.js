@@ -2,6 +2,8 @@ const path = require("path");
 const webpack = require("webpack");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 
+const configFile = path.join(__dirname, process.env.TS_NODE_PROJECT);
+
 module.exports = {
   mode: "development",
   devtool: "inline-source-map",
@@ -13,7 +15,7 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.ts$/, loader: "ts-loader" }
+      { test: /\.ts$/, loader: "ts-loader", options: { configFile } }
     ]
   },
   plugins: [

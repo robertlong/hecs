@@ -1,19 +1,45 @@
-import { World, System, EntityId, TEntityId, Read, Write, SystemContext, Query } from "hecs";
+# HECS
+> HECS Entity Component System
+
+A fast ECS written in Javascript.
+
+## Goals
+- Performance
+  - As little memory allocation and garbage collection as possible
+  - Fast iterators
+- Predictability
+  - Systems run in the order they are registered
+  - Events are processed in the game loop with the rest of the system's logic
+
+## Roadmap
+- Custom Schedulers
+  - Specify dependencies between systems
+  - Enable systems to run in parallel
+- Parallelism
+  - Using transferable objects in WebWorkers
+  - Using SharedArrayBuffer
+- WASM Integration
+  - Rust API that can be used to write high performance systems in WASM
+
+## Getting Started
+
+```
+npm install -S hecs
+```
+
+```js
+import { World, System, EntityId, Read, Write } from "hecs";
 
 const world = new World();
 
 class Position {
-  x: number;
-
-  constructor(x: number) {
+  constructor(x) {
     this.x = x;
   }
 }
 
 class Velocity {
-  v: number;
-
-  constructor(v: number) {
+  constructor(v) {
     this.v = v;
   }
 }
@@ -21,11 +47,7 @@ class Velocity {
 world.registerComponent(Position);
 world.registerComponent(Velocity);
 
-interface VelocitySystemContext extends SystemContext {
-  entities: Query<[Position, Velocity]>
-}
-
-class VelocitySystem extends System<VelocitySystemContext> {
+class VelocitySystem extends System {
   setup() {
     return {
       entities: this.world.createQuery(Write(Position), Read(Velocity))
@@ -39,11 +61,7 @@ class VelocitySystem extends System<VelocitySystemContext> {
   }
 }
 
-interface LoggingSystemContext extends SystemContext {
-  entities: Query<[TEntityId, Position]>
-}
-
-class LoggingSystem extends System<LoggingSystemContext> {
+class LoggingSystem extends System {
   setup() {
     return {
       entities: this.world.createQuery(EntityId, Read(Position))
@@ -74,3 +92,8 @@ function update() {
 }
 
 requestAnimationFrame(update);
+```
+
+
+## Credits
+- API heavily inspired by [Specs](https://github.com/slide-rs/specs)

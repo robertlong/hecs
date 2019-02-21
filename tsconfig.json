@@ -1,13 +1,14 @@
 {
   "compilerOptions": {
     "module": "commonjs",
+    "target": "es2018",
+    "noImplicitAny": true,
     "sourceMap": true,
-    "target": "es2018"
-  },
-  "include": [
-    "types/**/*.ts",
-    "src/**/*.ts",
-    "test/**/*.ts",
-    "bench/**/*.ts"
-  ]
+    "baseUrl": "./",
+    "paths": {
+      "hecs": [
+        "./src/index.ts"
+      ]
+    }
+  }
 }
