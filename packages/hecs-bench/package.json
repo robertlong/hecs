@@ -1,0 +1,28 @@
+{
+  "name": "hecs-bench",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Benchmarks for hecs",
+  "main": "lib/index.js",
+  "scripts": {
+    "bench": "npm run bench:node",
+    "bench:node": "cross-env NODE_ENV=production ts-node ./src/index.ts",
+    "bench:browser": "cross-env TS_NODE_PROJECT=tsconfig.web.json NODE_ENV=production webpack-dev-server"
+  },
+  "author": "Robert Long",
+  "license": "MIT",
+  "dependencies": {
+    "hecs": "^0.1.0"
+  },
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "html-webpack-plugin": "^3.2.0",
+    "ts-loader": "^5.3.3",
+    "ts-node": "^8.0.2",
+    "typescript": "^3.3.3333",
+    "webpack": "^4.29.5",
+    "webpack-cli": "^3.2.3",
+    "webpack-dev-server": "^3.2.0",
+    "webpack-merge": "^4.2.1"
+  }
+}

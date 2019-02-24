@@ -1,5 +1,8 @@
 node_modules/
 .nyc_output/
 coverage/
+lib-cjs/
+lib-esm/
 dist/
-dist-esm/
+yarn-error.log
+.DS_Store
