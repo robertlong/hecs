@@ -3,16 +3,34 @@ import { MapComponentStorage } from "./MapComponentStorage";
 
 let wrapImmutableComponent: <T extends IComponent>(component: T) => T;
 if (process.env.NODE_ENV === "development") {
+  const proxyHandler = {
+    set(target: IComponent, prop: string) {
+      throw new Error(
+        `Tried to write to "${target.constructor.name}#${String(
+          prop
+        )}" on immutable component. Use Write() or .getMutableComponent() to write to a component.`
+      );
+    }
+  };
+
+  const proxyMap: WeakMap<IComponent, IComponent> = new WeakMap();
+
   wrapImmutableComponent = <T>(component: T): T => {
-    return new Proxy((component as unknown) as object, {
-      set(target: IComponent, prop: string) {
-        throw new Error(
-          `Tried to write to "${target.constructor.name}#${String(
-            prop
-          )}" on immutable component. Use Write() or .getMutableComponent() to write to a component.`
-        );
-      }
-    }) as T;
+    if (component === undefined) {
+      return undefined;
+    }
+
+    let wrappedComponent = proxyMap.get(component);
+
+    if (!wrappedComponent) {
+      wrappedComponent = new Proxy(
+        (component as unknown) as object,
+        proxyHandler
+      ) as T;
+      proxyMap.set(component, wrappedComponent);
+    }
+
+    return wrappedComponent as T;
   };
 }
 
@@ -391,7 +409,14 @@ export class World {
           // tslint:disable-next-line: no-conditional-assignment
           if ((id = eventQueue.pop()) !== undefined) {
             results[0] = id;
-            results[1] = componentStorage.get(id) as T;
+
+            let component = componentStorage.get(id) as T;
+
+            if (process.env.NODE_ENV === "development") {
+              component = wrapImmutableComponent(component);
+            }
+
+            results[1] = component;
           } else {
             result.done = true;
           }
