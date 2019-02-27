@@ -9,5 +9,9 @@ module.exports = merge(baseConfig, {
     path: path.resolve(__dirname, "dist"),
     filename: "bundle.js"
   },
-  plugins: [new HTMLWebpackPlugin()]
+  plugins: [
+    new HTMLWebpackPlugin({
+      template: path.resolve(__dirname, "index.html")
+    })
+  ]
 });
