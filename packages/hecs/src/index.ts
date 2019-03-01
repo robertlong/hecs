@@ -270,20 +270,20 @@ export class World {
     a: TQueryParameter<A>,
     b: TQueryParameter<B>,
     c: TQueryParameter<C>,
-    d: TQueryParameter<C>
+    d: TQueryParameter<D>
   ): IQuery<[A, B, C, D]>;
   public createQuery<A, B, C, D, E>(
     a: TQueryParameter<A>,
     b: TQueryParameter<B>,
     c: TQueryParameter<C>,
-    d: TQueryParameter<C>,
+    d: TQueryParameter<D>,
     e: TQueryParameter<E>
   ): IQuery<[A, B, C, D, E]>;
   public createQuery<A, B, C, D, E, F>(
     a: TQueryParameter<A>,
     b: TQueryParameter<B>,
     c: TQueryParameter<C>,
-    d: TQueryParameter<C>,
+    d: TQueryParameter<D>,
     e: TQueryParameter<E>,
     f: TQueryParameter<F>
   ): IQuery<[A, B, C, D, E, F]>;
