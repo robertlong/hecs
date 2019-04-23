@@ -1,9 +1,11 @@
 # HECS
+
 > HECS Entity Component System
 
-A fast ECS written in Javascript.
+An experimental ECS written in Javascript.
 
 ## Goals
+
 - Performance
   - As little memory allocation and garbage collection as possible
   - Fast iterators
@@ -12,6 +14,7 @@ A fast ECS written in Javascript.
   - Events are processed in the game loop with the rest of the system's logic
 
 ## Roadmap
+
 - Custom Schedulers
   - Specify dependencies between systems
   - Enable systems to run in parallel
@@ -94,6 +97,6 @@ function update() {
 requestAnimationFrame(update);
 ```
 
-
 ## Credits
+
 - API heavily inspired by [Specs](https://github.com/slide-rs/specs)

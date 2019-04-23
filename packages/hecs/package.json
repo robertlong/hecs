@@ -1,7 +1,7 @@
 {
   "name": "hecs",
   "version": "0.1.0",
-  "description": "A fast ECS written in Javascript.",
+  "description": "An experimental ECS written in Javascript.",
   "author": "Robert Long",
   "license": "MIT",
   "repository": {
