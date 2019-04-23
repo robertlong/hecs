@@ -2,7 +2,7 @@
 
 > HECS Entity Component System
 
-A fast ECS written in Javascript.
+An experimental ECS written in Javascript.
 
 ## Goals
 
