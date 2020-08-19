@@ -4,6 +4,10 @@
 
 An experimental ECS written in Javascript.
 
+## THIS PROJECT IS NO LONGER MAINTAINED
+
+I have transfered the npm package to a new project. The last maintained version of hecs is `0.1.1`. I am currently maintaining a new ECS project [ECSY](https://ecsy.io) and encourage users to move to it.
+
 ## Goals
 
 - Performance
@@ -27,7 +31,7 @@ An experimental ECS written in Javascript.
 ## Getting Started
 
 ```
-npm install -S hecs
+npm install -S hecs@0.1.1
 ```
 
 ```js
